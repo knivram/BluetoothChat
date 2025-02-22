@@ -30,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.bluetooth_chat.presentation.components.ChatScreen
 import com.example.bluetooth_chat.presentation.components.DeviceScreen
 import com.example.bluetooth_chat.ui.theme.Bluetooth_chatTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -125,6 +126,13 @@ class MainActivity : ComponentActivity() {
                                             Text("Cancel")
                                         }
                                     }
+                                }
+                                state.isConnected -> {
+                                    ChatScreen(
+                                        state = state,
+                                        onSendMessage = viewModel::sendMessage,
+                                        onDisconnect = viewModel::disconnectFromDevice
+                                    )
                                 }
                                 else -> {
                                     DeviceScreen(

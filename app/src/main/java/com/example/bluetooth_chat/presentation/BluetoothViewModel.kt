@@ -8,6 +8,7 @@ import com.example.bluetooth_chat.domain.chat.ConnectionResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -23,7 +24,7 @@ class BluetoothViewModel @Inject constructor(
     ) { scannedDevices, pairedDevices, state ->
         state.copy(
             scannedDevices = scannedDevices,
-            pairedDevices = pairedDevices
+            pairedDevices = pairedDevices,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), _state.value)
 
@@ -42,7 +43,7 @@ class BluetoothViewModel @Inject constructor(
     }
 
     fun connectToDevice(device: BluetoothDeviceDomain) {
-        _state.update { it.copy(isConnecting = true) }
+        _state.update { it.copy(isConnecting = true, messages = emptyList()) }
         deviceConnectionJob = bluetoothController
             .connectToDevice(device)
             .listen()
@@ -53,15 +54,25 @@ class BluetoothViewModel @Inject constructor(
         bluetoothController.closeConnection()
         _state.update { it.copy(
             isConnecting = false,
-            isConnected = false
+            isConnected = false,
         ) }
     }
 
     fun waitForIncomingConnections() {
-        _state.update { it.copy(isConnecting = true) }
+        _state.update { it.copy(isConnecting = true, messages = emptyList()) }
         deviceConnectionJob = bluetoothController
             .startBluetoothServer()
             .listen()
+    }
+
+    fun sendMessage(message: String) {
+        viewModelScope.launch {
+            bluetoothController.trySendMessage(message)?.let { bluetoothMessage ->
+                _state.update { it.copy(
+                    messages = it.messages + bluetoothMessage
+                ) }
+            }
+        }
     }
 
     fun startScan() {
@@ -87,6 +98,11 @@ class BluetoothViewModel @Inject constructor(
                         isConnected = false,
                         isConnecting = false,
                         errorMessage = result.message
+                    ) }
+                }
+                is ConnectionResult.MessageReceived -> {
+                    _state.update { it.copy(
+                        messages = it.messages + result.message
                     ) }
                 }
             }
