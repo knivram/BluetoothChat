@@ -1,4 +1,4 @@
-package com.plcoding.bluetoothchat.presentation.components
+package com.example.bluetooth_chat.presentation.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -18,16 +18,18 @@ import com.example.bluetooth_chat.presentation.BluetoothUiState
 fun DeviceScreen(
     state: BluetoothUiState,
     onStartScan: () -> Unit,
-    onStopScan: () -> Unit
+    onStopScan: () -> Unit,
+    onStartServer: () -> Unit,
+    onDeviceClick: (BluetoothDevice) -> Unit
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
     ) {
         BluetoothDeviceList(
-            pairedDevices = state.pairedDevices,
-            scannedDevices = state.scannedDevices,
-            onClick = {},
+            pairedDevices = state.pairedDevices.toList(),
+            scannedDevices = state.scannedDevices.toList(),
+            onClick = onDeviceClick,
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
@@ -41,6 +43,9 @@ fun DeviceScreen(
             }
             Button(onClick = onStopScan) {
                 Text(text = "Stop scan")
+            }
+            Button(onClick = onStartServer) {
+                Text(text = "Start server")
             }
         }
     }
