@@ -8,11 +8,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.bluetooth_chat"
+    namespace = "com.itsallprivate.bluetoothchat"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.bluetooth_chat"
+        applicationId = "com.itsallprivate.bluetoothchat"
         minSdk = 30
         targetSdk = 35
         versionCode = 1
