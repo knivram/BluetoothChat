@@ -10,8 +10,10 @@ import android.bluetooth.BluetoothSocket
 import android.content.Context
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import androidx.compose.runtime.clearCompositionErrors
 import com.example.bluetooth_chat.domain.chat.BluetoothController
 import com.example.bluetooth_chat.domain.chat.BluetoothDeviceDomain
+import com.example.bluetooth_chat.domain.chat.BluetoothMessage
 import com.example.bluetooth_chat.domain.chat.ConnectionResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -23,7 +25,7 @@ import java.util.*
 @SuppressLint("MissingPermission")
 class BluetoothControllerImpl(
     private val context: Context
-): BluetoothController {
+) : BluetoothController {
 
     private val bluetoothManager: BluetoothManager? by lazy {
         context.getSystemService(BluetoothManager::class.java)
@@ -31,6 +33,7 @@ class BluetoothControllerImpl(
     private val bluetoothAdapter by lazy {
         bluetoothManager?.adapter
     }
+    private var dataTransferService: BluetoothDataTransferService? = null
 
     private val _isConnected = MutableStateFlow(false)
     override val isConnected: StateFlow<Boolean>
@@ -55,7 +58,7 @@ class BluetoothControllerImpl(
     }
 
     private val bluetoothStateReceiver = BluetoothStateReceiver { isConnected, bluetoothDevice ->
-        if(bluetoothAdapter?.bondedDevices?.contains(bluetoothDevice) == true) {
+        if (bluetoothAdapter?.bondedDevices?.contains(bluetoothDevice) == true) {
             _isConnected.update { isConnected }
         } else {
             CoroutineScope(Dispatchers.IO).launch {
@@ -80,7 +83,7 @@ class BluetoothControllerImpl(
     }
 
     override fun startDiscovery() {
-        if(!hasPermission(Manifest.permission.BLUETOOTH_SCAN)) {
+        if (!hasPermission(Manifest.permission.BLUETOOTH_SCAN)) {
             return
         }
 
@@ -95,7 +98,7 @@ class BluetoothControllerImpl(
     }
 
     override fun stopDiscovery() {
-        if(!hasPermission(Manifest.permission.BLUETOOTH_SCAN)) {
+        if (!hasPermission(Manifest.permission.BLUETOOTH_SCAN)) {
             return
         }
 
@@ -104,7 +107,7 @@ class BluetoothControllerImpl(
 
     override fun startBluetoothServer(): Flow<ConnectionResult> {
         return flow {
-            if(!hasPermission(Manifest.permission.BLUETOOTH_CONNECT)) {
+            if (!hasPermission(Manifest.permission.BLUETOOTH_CONNECT)) {
                 throw SecurityException("No BLUETOOTH_CONNECT permission")
             }
 
@@ -114,17 +117,27 @@ class BluetoothControllerImpl(
             )
 
             var shouldLoop = true
-            while(shouldLoop) {
+            while (shouldLoop) {
                 currentClientSocket = try {
                     currentServerSocket?.accept()?.also {
                         emit(ConnectionResult.ConnectionEstablished)
                     }
-                } catch(e: IOException) {
+                } catch (e: IOException) {
                     shouldLoop = false
                     null
                 }
-                currentClientSocket?.let {
+                currentClientSocket?.let { clientSocket ->
                     currentServerSocket?.close()
+                    val service = BluetoothDataTransferService(clientSocket)
+                    dataTransferService = service
+
+                    emitAll(
+                        service
+                            .listenForIncomingMessages()
+                            .map {
+                                ConnectionResult.MessageReceived(it)
+                            }
+                    )
                 }
             }
         }.onCompletion {
@@ -134,7 +147,7 @@ class BluetoothControllerImpl(
 
     override fun connectToDevice(device: BluetoothDeviceDomain): Flow<ConnectionResult> {
         return flow {
-            if(!hasPermission(Manifest.permission.BLUETOOTH_CONNECT)) {
+            if (!hasPermission(Manifest.permission.BLUETOOTH_CONNECT)) {
                 throw SecurityException("No BLUETOOTH_CONNECT permission")
             }
 
@@ -149,7 +162,16 @@ class BluetoothControllerImpl(
                 try {
                     socket.connect()
                     emit(ConnectionResult.ConnectionEstablished)
-                } catch(e: IOException) {
+                    BluetoothDataTransferService(socket).also { service ->
+                        dataTransferService = service
+                        emitAll(
+                            service.listenForIncomingMessages()
+                                .map { message ->
+                                    ConnectionResult.MessageReceived(message)
+                                }
+                        )
+                    }
+                } catch (e: IOException) {
                     socket.close()
                     currentClientSocket = null
                     emit(ConnectionResult.Error("Connection was interrupted"))
@@ -158,6 +180,26 @@ class BluetoothControllerImpl(
         }.onCompletion {
             closeConnection()
         }.flowOn(Dispatchers.IO)
+    }
+
+    override suspend fun trySendMessage(message: String): BluetoothMessage? {
+        if (!hasPermission(Manifest.permission.BLUETOOTH_CONNECT)) {
+            return null
+        }
+
+        return dataTransferService?.let { service ->
+            val bluetoothMessage = BluetoothMessage(
+                message = message,
+                senderName = bluetoothAdapter?.name ?: "Unknown",
+                isFromLocalUser = true
+            )
+            val successful = service.sendMessage(bluetoothMessage.toByteArray())
+            if (successful) {
+                bluetoothMessage
+            } else {
+                null
+            }
+        }
     }
 
     override fun closeConnection() {
@@ -174,7 +216,7 @@ class BluetoothControllerImpl(
     }
 
     private fun updatePairedDevices() {
-        if(!hasPermission(Manifest.permission.BLUETOOTH_CONNECT)) {
+        if (!hasPermission(Manifest.permission.BLUETOOTH_CONNECT)) {
             return
         }
         bluetoothAdapter
