@@ -56,29 +56,11 @@ class BluetoothControllerImpl(
         }
     }
 
-    private val bluetoothStateReceiver = BluetoothStateReceiver { isConnected, bluetoothDevice ->
-        if (bluetoothAdapter?.bondedDevices?.contains(bluetoothDevice) == true) {
-            _isConnected.update { isConnected }
-        } else {
-            CoroutineScope(Dispatchers.IO).launch {
-                _errors.emit("Can't connect to a non-paired device.")
-            }
-        }
-    }
-
     private var currentServerSocket: BluetoothServerSocket? = null
     private var currentClientSocket: BluetoothSocket? = null
 
     init {
         updatePairedDevices()
-        context.registerReceiver(
-            bluetoothStateReceiver,
-            IntentFilter().apply {
-                addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)
-                addAction(BluetoothDevice.ACTION_ACL_CONNECTED)
-                addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED)
-            }
-        )
     }
 
     override fun startDiscovery() {
@@ -210,7 +192,6 @@ class BluetoothControllerImpl(
 
     override fun release() {
         context.unregisterReceiver(foundDeviceReceiver)
-        context.unregisterReceiver(bluetoothStateReceiver)
         closeConnection()
     }
 
