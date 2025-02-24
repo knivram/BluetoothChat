@@ -69,7 +69,7 @@ class MainActivity : ComponentActivity() {
                         DeviceScreen(navController)
                     }
                     composable<Chat> {
-                        ChatScreen()
+                        ChatScreen(navController)
                     }
                 }
             }
