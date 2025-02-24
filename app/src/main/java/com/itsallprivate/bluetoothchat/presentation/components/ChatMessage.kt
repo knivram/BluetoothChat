@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -18,6 +19,8 @@ import com.itsallprivate.bluetoothchat.domain.chat.BluetoothMessage
 import com.itsallprivate.bluetoothchat.ui.theme.BluetoothChatTheme
 import com.itsallprivate.bluetoothchat.ui.theme.OldRose
 import com.itsallprivate.bluetoothchat.ui.theme.Vanilla
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 
 @Composable
@@ -42,17 +45,23 @@ fun ChatMessage(
             .padding(12.dp)
     ) {
         Text(
-            text = message.senderName,
-            fontSize = 10.sp,
-            color = Color.Black,
-        )
-        Text(
             text = message.message,
             color = Color.Black,
             modifier = Modifier.widthIn(min= 80.dp, max = 250.dp)
         )
-
+        Text(
+            text = message.dateTime.formatToMessage(),
+            fontSize = 10.sp,
+            color = Color.Black,
+            modifier = Modifier.align(Alignment.End)
+        )
     }
+}
+
+fun LocalDateTime.formatToMessage(): String {
+    val date = this.format(DateTimeFormatter.ofPattern("MMM dd, yyyy"))
+    val time = this.format(DateTimeFormatter.ofPattern("HH:mm"))
+    return "$date at $time"
 }
 
 @Preview
@@ -65,15 +74,15 @@ fun ChatMessagePreview() {
             ChatMessage(
                 message = BluetoothMessage(
                     message = "Hi",
-                    senderName = "Pixel 8",
                     isFromLocalUser = true,
+                    dateTime = LocalDateTime.now().minusDays(1)
                 )
             )
             ChatMessage(
                 message = BluetoothMessage(
                     message = "Hello, this is a longer message to test the width constraints.",
-                    senderName = "Pixel 8",
                     isFromLocalUser = true,
+                    dateTime = LocalDateTime.now()
                 )
             )
         }

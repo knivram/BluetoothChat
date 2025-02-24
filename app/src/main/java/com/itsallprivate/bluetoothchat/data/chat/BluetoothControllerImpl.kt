@@ -2,7 +2,6 @@ package com.itsallprivate.bluetoothchat.data.chat
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothServerSocket
@@ -14,11 +13,10 @@ import com.itsallprivate.bluetoothchat.domain.chat.BluetoothController
 import com.itsallprivate.bluetoothchat.domain.chat.BluetoothDeviceDomain
 import com.itsallprivate.bluetoothchat.domain.chat.BluetoothMessage
 import com.itsallprivate.bluetoothchat.domain.chat.ConnectionResult
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import java.io.IOException
+import java.time.LocalDateTime
 import java.util.*
 
 @SuppressLint("MissingPermission")
@@ -171,8 +169,8 @@ class BluetoothControllerImpl(
         return dataTransferService?.let { service ->
             val bluetoothMessage = BluetoothMessage(
                 message = message,
-                senderName = bluetoothAdapter?.name ?: "Unknown",
-                isFromLocalUser = true
+                isFromLocalUser = true,
+                dateTime = LocalDateTime.now()
             )
             val successful = service.sendMessage(bluetoothMessage.toByteArray())
             if (successful) {

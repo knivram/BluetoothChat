@@ -1,18 +1,15 @@
 package com.itsallprivate.bluetoothchat.data.chat
 
 import com.itsallprivate.bluetoothchat.domain.chat.BluetoothMessage
-
-// TODO: Use json serialization instead of string manipulation
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 fun String.toBluetoothMessage(isFromLocalUser: Boolean): BluetoothMessage {
-    val (senderName, message) = this.split("#")
-    return BluetoothMessage(
-        message = message,
-        senderName = senderName,
+    return Json.decodeFromString<BluetoothMessage>(this).copy(
         isFromLocalUser = isFromLocalUser
     )
 }
 
 fun BluetoothMessage.toByteArray(): ByteArray {
-    return "$senderName#$message".encodeToByteArray()
+    return Json.encodeToString(this).toByteArray()
 }
