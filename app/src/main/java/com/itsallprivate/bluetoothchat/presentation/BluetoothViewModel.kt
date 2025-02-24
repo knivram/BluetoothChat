@@ -28,93 +28,12 @@ class BluetoothViewModel @Inject constructor(
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), _state.value)
 
-    private var deviceConnectionJob: Job? = null
-
-    init {
-        bluetoothController.isConnected.onEach { isConnected ->
-            _state.update { it.copy(isConnected = isConnected) }
-        }.launchIn(viewModelScope)
-
-        bluetoothController.errors.onEach { error ->
-            _state.update { it.copy(
-                errorMessage = error
-            ) }
-        }.launchIn(viewModelScope)
-    }
-
-    fun connectToDevice(device: BluetoothDeviceDomain) {
-        _state.update { it.copy(isConnecting = true, messages = emptyList()) }
-        deviceConnectionJob = bluetoothController
-            .connectToDevice(device)
-            .listen()
-    }
-
-    fun disconnectFromDevice() {
-        deviceConnectionJob?.cancel()
-        bluetoothController.closeConnection()
-        _state.update { it.copy(
-            isConnecting = false,
-            isConnected = false,
-        ) }
-    }
-
-    fun waitForIncomingConnections() {
-        _state.update { it.copy(isConnecting = true, messages = emptyList()) }
-        deviceConnectionJob = bluetoothController
-            .startBluetoothServer()
-            .listen()
-    }
-
-    fun sendMessage(message: String) {
-        viewModelScope.launch {
-            bluetoothController.trySendMessage(message)?.let { bluetoothMessage ->
-                _state.update { it.copy(
-                    messages = it.messages + bluetoothMessage
-                ) }
-            }
-        }
-    }
-
     fun startScan() {
         bluetoothController.startDiscovery()
     }
 
     fun stopScan() {
         bluetoothController.stopDiscovery()
-    }
-
-    private fun Flow<ConnectionResult>.listen(): Job {
-        return onEach { result ->
-            when(result) {
-                is ConnectionResult.ConnectionEstablished -> {
-                    _state.update { it.copy(
-                        isConnected = true,
-                        isConnecting = false,
-                        errorMessage = null
-                    ) }
-                }
-                is ConnectionResult.Error -> {
-                    _state.update { it.copy(
-                        isConnected = false,
-                        isConnecting = false,
-                        errorMessage = result.message
-                    ) }
-                }
-                is ConnectionResult.MessageReceived -> {
-                    _state.update { it.copy(
-                        messages = it.messages + result.message
-                    ) }
-                }
-            }
-        }
-            .catch { throwable ->
-                bluetoothController.closeConnection()
-                _state.update { it.copy(
-                    isConnected = false,
-                    isConnecting = false,
-                ) }
-            }
-            .launchIn(viewModelScope)
     }
 
     override fun onCleared() {

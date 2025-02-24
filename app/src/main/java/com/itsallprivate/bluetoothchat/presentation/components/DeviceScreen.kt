@@ -5,47 +5,64 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
+import com.itsallprivate.bluetoothchat.Chat
 import com.itsallprivate.bluetoothchat.domain.chat.BluetoothDevice
-import com.itsallprivate.bluetoothchat.presentation.BluetoothUiState
+import com.itsallprivate.bluetoothchat.presentation.BluetoothViewModel
 
 @Composable
 fun DeviceScreen(
-    state: BluetoothUiState,
-    onStartScan: () -> Unit,
-    onStopScan: () -> Unit,
-    onStartServer: () -> Unit,
-    onDeviceClick: (BluetoothDevice) -> Unit
+    navController: NavHostController
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
+    val viewModel = hiltViewModel<BluetoothViewModel>()
+    val state by viewModel.state.collectAsState()
+
+    Surface(
+        color = MaterialTheme.colorScheme.background
     ) {
-        BluetoothDeviceList(
-            pairedDevices = state.pairedDevices.toList(),
-            scannedDevices = state.scannedDevices.toList(),
-            onClick = onDeviceClick,
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-        )
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceAround
-        ) {
-            Button(onClick = onStartScan) {
-                Text(text = "Start scan")
-            }
-            Button(onClick = onStopScan) {
-                Text(text = "Stop scan")
-            }
-            Button(onClick = onStartServer) {
-                Text(text = "Start server")
+        Scaffold(
+            modifier = Modifier.fillMaxSize()
+        ) { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
+                BluetoothDeviceList(
+                    pairedDevices = state.pairedDevices.toList(),
+                    scannedDevices = state.scannedDevices.toList(),
+                    onClick = {
+                        navController.navigate(
+                            Chat(name = it.name, address = it.address)
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceAround
+                ) {
+                    Button(onClick = viewModel::startScan) {
+                        Text(text = "Start scan")
+                    }
+                    Button(onClick = viewModel::stopScan) {
+                        Text(text = "Stop scan")
+                    }
+                }
             }
         }
     }

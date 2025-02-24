@@ -9,12 +9,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.itsallprivate.bluetoothchat.domain.chat.BluetoothDevice
-import com.itsallprivate.bluetoothchat.presentation.components.BluetoothConnectionScreen
+import com.itsallprivate.bluetoothchat.presentation.components.ChatScreen
+import com.itsallprivate.bluetoothchat.presentation.components.DeviceScreen
 import com.itsallprivate.bluetoothchat.ui.theme.BluetoothChatTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.serialization.Serializable
@@ -41,11 +40,11 @@ class MainActivity : ComponentActivity() {
         val permissionLauncher = registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
         ) { perms ->
-            val canEnableBluetooth = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val canEnableBluetooth = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 perms[Manifest.permission.BLUETOOTH_CONNECT] == true
             } else true
 
-            if(canEnableBluetooth && !isBluetoothEnabled) {
+            if (canEnableBluetooth && !isBluetoothEnabled) {
                 // ask user to turn on bluetooth
                 enableBluetoothLauncher.launch(
                     Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
@@ -53,7 +52,7 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             permissionLauncher.launch(
                 arrayOf(
                     Manifest.permission.BLUETOOTH_SCAN,
@@ -65,9 +64,12 @@ class MainActivity : ComponentActivity() {
         setContent {
             BluetoothChatTheme {
                 val navController = rememberNavController()
-                NavHost(navController, startDestination = NavRoutes.BluetoothConnection ) {
-                    composable<NavRoutes.BluetoothConnection> {
-                        BluetoothConnectionScreen()
+                NavHost(navController, startDestination = BluetoothConnection) {
+                    composable<BluetoothConnection> {
+                        DeviceScreen(navController)
+                    }
+                    composable<Chat> {
+                        ChatScreen()
                     }
                 }
             }
@@ -75,7 +77,8 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-sealed class NavRoutes {
-    @Serializable
-    object BluetoothConnection: NavRoutes()
-}
+@Serializable
+object BluetoothConnection
+
+@Serializable
+data class Chat(val name: String?, val address: String)
