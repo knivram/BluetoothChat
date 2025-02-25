@@ -99,7 +99,7 @@ class BluetoothControllerImpl(
             while (shouldLoop) {
                 currentClientSocket = try {
                     currentServerSocket?.accept()?.also {
-                        emit(ConnectionResult.ConnectionEstablished)
+                        emit(ConnectionResult.ConnectionEstablished(it.remoteDevice.toBluetoothDeviceDomain()))
                     }
                 } catch (e: IOException) {
                     shouldLoop = false
@@ -140,7 +140,7 @@ class BluetoothControllerImpl(
             currentClientSocket?.let { socket ->
                 try {
                     socket.connect()
-                    emit(ConnectionResult.ConnectionEstablished)
+                    emit(ConnectionResult.ConnectionEstablished(socket.remoteDevice.toBluetoothDeviceDomain()))
                     BluetoothDataTransferService(socket).also { service ->
                         dataTransferService = service
                         emitAll(

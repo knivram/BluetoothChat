@@ -96,7 +96,13 @@ class ChatViewModel @Inject constructor(
         return onEach { result ->
             when (result) {
                 is ConnectionResult.ConnectionEstablished -> {
-                    _status.update { ConnectionStatus.CONNECTED }
+                    if (result.device.address == device.address) {
+                        _status.update { ConnectionStatus.CONNECTED }
+                    } else {
+                        bluetoothController.closeConnection()
+                        deviceConnectionJob?.cancel()
+                        _status.update { ConnectionStatus.DISCONNECTED }
+                    }
                 }
 
                 is ConnectionResult.Error -> {
