@@ -2,6 +2,7 @@ package com.itsallprivate.bluetoothchat.data.chat
 
 import android.bluetooth.BluetoothSocket
 import com.itsallprivate.bluetoothchat.domain.chat.BluetoothMessage
+import com.itsallprivate.bluetoothchat.domain.chat.ConnectionClosedException
 import com.itsallprivate.bluetoothchat.domain.chat.TransferFailedException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -23,6 +24,9 @@ class BluetoothDataTransferService(
                 val byteCount = try {
                     socket.inputStream.read(buffer)
                 } catch (e: IOException) {
+                    if (e.message?.startsWith("bt socket closed") == true) {
+                        throw ConnectionClosedException()
+                    }
                     throw TransferFailedException()
                 }
                 emit(
