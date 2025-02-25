@@ -72,8 +72,8 @@ class ChatViewModel @Inject constructor(
         }.launchIn(viewModelScope)
 
         viewModelScope.launch {
-            chatRepository.getMessagesForDevice(device.address).let {
-                _messages.update { it }
+            chatRepository.getMessagesForDevice(device.address).let { loadedMessages ->
+                _messages.update { loadedMessages }
             }
         }
     }
