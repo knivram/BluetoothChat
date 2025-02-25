@@ -13,6 +13,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.itsallprivate.bluetoothchat.presentation.components.ChatScreen
+import com.itsallprivate.bluetoothchat.presentation.components.ChatsOverviewScreen
 import com.itsallprivate.bluetoothchat.presentation.components.DeviceScreen
 import com.itsallprivate.bluetoothchat.ui.theme.BluetoothChatTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -64,7 +65,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             BluetoothChatTheme {
                 val navController = rememberNavController()
-                NavHost(navController, startDestination = BluetoothConnection) {
+                NavHost(navController, startDestination = ChatsOverview) {
+                    composable<ChatsOverview> {
+                        ChatsOverviewScreen(navController)
+                    }
                     composable<BluetoothConnection> {
                         DeviceScreen(navController)
                     }
@@ -76,6 +80,9 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
+@Serializable
+object ChatsOverview
 
 @Serializable
 object BluetoothConnection

@@ -14,5 +14,5 @@ interface ChatDeviceDao {
     suspend fun getDevice(address: String): ChatDeviceEntity?
 
     @Query("SELECT * FROM chat_devices")
-    suspend fun getAllDevices(): List<ChatDeviceEntity>
+    suspend fun getAll(): List<ChatDeviceEntity>
 }

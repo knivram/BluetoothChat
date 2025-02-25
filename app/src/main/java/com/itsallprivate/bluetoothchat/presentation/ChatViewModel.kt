@@ -153,4 +153,9 @@ class ChatViewModel @Inject constructor(
             Toast.LENGTH_LONG
         ).show()
     }
+
+    override fun onCleared() {
+        super.onCleared()
+        bluetoothController.release()
+    }
 }

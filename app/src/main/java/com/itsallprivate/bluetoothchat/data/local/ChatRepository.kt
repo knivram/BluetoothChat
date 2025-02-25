@@ -39,4 +39,15 @@ class ChatRepository(
             }
         }
     }
+
+    suspend fun getAllDevices(): List<BluetoothDeviceDomain> {
+        return withContext(Dispatchers.IO) {
+            chatDeviceDao.getAll().map {
+                BluetoothDeviceDomain(
+                    name = it.name,
+                    address = it.address
+                )
+            }
+        }
+    }
 }
