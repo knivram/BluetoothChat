@@ -52,6 +52,9 @@ class BluetoothControllerImpl(
         }
     }
 
+    // Flag to track receiver registration status
+    private var isReceiverRegistered = false
+
     private var currentServerSocket: BluetoothServerSocket? = null
     private var currentClientSocket: BluetoothSocket? = null
 
@@ -68,6 +71,7 @@ class BluetoothControllerImpl(
             foundDeviceReceiver,
             IntentFilter(BluetoothDevice.ACTION_FOUND)
         )
+        isReceiverRegistered = true
 
         updatePairedDevices()
 
@@ -201,7 +205,10 @@ class BluetoothControllerImpl(
     }
 
     override fun release() {
-        context.unregisterReceiver(foundDeviceReceiver)
+        if (isReceiverRegistered) {
+            context.unregisterReceiver(foundDeviceReceiver)
+            isReceiverRegistered = false
+        }
         closeConnection()
     }
 

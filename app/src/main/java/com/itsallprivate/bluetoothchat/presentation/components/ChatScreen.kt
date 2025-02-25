@@ -155,11 +155,14 @@ fun ChatScreen(
                         placeholder = { Text("Message") }
                     )
 
-                    IconButton(onClick = {
-                        viewModel.sendMessage(message)
-                        keyboardController?.hide()
-                        message = ""
-                    }) {
+                    IconButton(
+                        onClick = {
+                            viewModel.sendMessage(message)
+                            keyboardController?.hide()
+                            message = ""
+                        },
+                        enabled = message.isNotBlank() && status == ConnectionStatus.CONNECTED
+                    ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Default.Send,
                             contentDescription = "Send"
