@@ -1,14 +1,10 @@
 package com.itsallprivate.bluetoothchat.presentation.components
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -26,7 +22,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.itsallprivate.bluetoothchat.BluetoothConnection
@@ -52,14 +47,17 @@ fun ChatsOverviewScreen(
                     .padding(innerPadding)
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = "Chats",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 24.sp,
-                        modifier = Modifier.weight(1f),
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Medium
+                        ),
+                        modifier = Modifier.weight(1f)
                     )
                     IconButton(
                         onClick = {
@@ -69,23 +67,16 @@ fun ChatsOverviewScreen(
                         Icon(
                             imageVector = Icons.Default.AddCircle,
                             contentDescription = "Add",
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.height(24.dp).width(24.dp)
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 }
                 LazyColumn {
                     items(chats) { chat ->
-                        Box(
-                            modifier = Modifier
-                                .clickable { navController.navigate(Chat(chat.name, chat.address)) }
-                                .padding(horizontal = 16.dp, vertical = 8.dp)
-                                .fillMaxWidth()
-                        ) {
-                            Text(
-                                text = chat.name ?: chat.address,
-                            )
-                        }
+                        ChatOverviewItem(
+                            chatOverview = chat,
+                            onClick = { navController.navigate(Chat(chat.name, chat.address)) }
+                        )
                     }
                 }
             }

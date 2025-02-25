@@ -2,6 +2,7 @@ package com.itsallprivate.bluetoothchat.data.local
 
 import com.itsallprivate.bluetoothchat.domain.chat.BluetoothDeviceDomain
 import com.itsallprivate.bluetoothchat.domain.chat.BluetoothMessage
+import com.itsallprivate.bluetoothchat.domain.chat.ChatOverview
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -48,6 +49,26 @@ class ChatRepository(
                     address = it.address
                 )
             }
+        }
+    }
+
+    suspend fun getChatOverviews(): List<ChatOverview> {
+        return withContext(Dispatchers.IO) {
+            chatDeviceDao.getAll().map { deviceEntity ->
+                val latestMessageEntity = chatMessageDao.getLatestMessageForDevice(deviceEntity.address)
+                val latestMessage = latestMessageEntity?.let { entity ->
+                    BluetoothMessage(
+                        message = entity.message,
+                        isFromLocalUser = entity.isFromLocalUser,
+                        dateTime = entity.dateTime
+                    )
+                }
+                ChatOverview(
+                    name = deviceEntity.name,
+                    address = deviceEntity.address,
+                    latestMessage = latestMessage
+                )
+            }.sortedByDescending { it.latestMessage?.dateTime }
         }
     }
 }

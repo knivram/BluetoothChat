@@ -3,10 +3,12 @@ package com.itsallprivate.bluetoothchat.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.itsallprivate.bluetoothchat.data.local.ChatRepository
-import com.itsallprivate.bluetoothchat.domain.chat.BluetoothDevice
+import com.itsallprivate.bluetoothchat.domain.chat.ChatOverview
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -15,13 +17,17 @@ import javax.inject.Inject
 open class ChatsOverviewViewModel @Inject constructor(
     private val chatRepository: ChatRepository,
 ) : ViewModel() {
-    private val _chats = MutableStateFlow(emptyList<BluetoothDevice>())
-    val chats = _chats.asStateFlow()
+    private val _chats = MutableStateFlow(emptyList<ChatOverview>())
+    val chats = _chats
+        .onStart {
+            loadChats()
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    init {
+    private fun loadChats() {
         viewModelScope.launch {
-            chatRepository.getAllDevices().let { loadedDevices ->
-                _chats.update { loadedDevices }
+            chatRepository.getChatOverviews().let { loadedOverviews ->
+                _chats.update { loadedOverviews }
             }
         }
     }
