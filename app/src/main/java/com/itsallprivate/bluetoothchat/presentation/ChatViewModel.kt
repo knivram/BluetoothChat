@@ -2,12 +2,12 @@ package com.itsallprivate.bluetoothchat.presentation
 
 import android.content.Context
 import android.widget.Toast
-import androidx.compose.runtime.SkippableUpdater
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.itsallprivate.bluetoothchat.Chat
+import com.itsallprivate.bluetoothchat.data.local.ChatRepository
 import com.itsallprivate.bluetoothchat.domain.chat.BluetoothConnectionErrorCode
 import com.itsallprivate.bluetoothchat.domain.chat.BluetoothConnectionErrorCode.CONNECTION_CLOSED
 import com.itsallprivate.bluetoothchat.domain.chat.BluetoothConnectionErrorCode.CONNECTION_FAILED
@@ -20,17 +20,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 enum class ConnectionStatus {
@@ -42,8 +38,9 @@ enum class ConnectionStatus {
 @HiltViewModel
 class ChatViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val bluetoothController: BluetoothController,
     @ApplicationContext private val context: Context,
+    private val bluetoothController: BluetoothController,
+    private val chatRepository: ChatRepository,
 ) : ViewModel() {
     private val _messages = MutableStateFlow(emptyList<BluetoothMessage>())
     val messages = _messages.asStateFlow()
@@ -73,6 +70,12 @@ class ChatViewModel @Inject constructor(
                 }
             }
         }.launchIn(viewModelScope)
+
+        viewModelScope.launch {
+            chatRepository.getMessagesForDevice(device.address).let {
+                _messages.update { it }
+            }
+        }
     }
 
     fun disconnectFromDevice() {
@@ -101,6 +104,7 @@ class ChatViewModel @Inject constructor(
                 _messages.update {
                     it + bluetoothMessage
                 }
+                chatRepository.addMessage(device, bluetoothMessage)
             }
         }
     }
@@ -128,14 +132,13 @@ class ChatViewModel @Inject constructor(
                     _messages.update {
                         it + result.message
                     }
+                    chatRepository.addMessage(device, result.message)
                 }
             }
-        }
-            .catch { throwable ->
-                bluetoothController.closeConnection()
-                _status.update { ConnectionStatus.DISCONNECTED }
-            }
-            .launchIn(viewModelScope)
+        }.catch { throwable ->
+            bluetoothController.closeConnection()
+            _status.update { ConnectionStatus.DISCONNECTED }
+        }.launchIn(viewModelScope)
     }
 
     private fun showToast(errorCode: BluetoothConnectionErrorCode) {
