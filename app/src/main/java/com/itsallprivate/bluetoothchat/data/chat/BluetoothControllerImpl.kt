@@ -9,9 +9,11 @@ import android.bluetooth.BluetoothSocket
 import android.content.Context
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import com.itsallprivate.bluetoothchat.domain.chat.BluetoothConnectionErrorCode
 import com.itsallprivate.bluetoothchat.domain.chat.BluetoothController
 import com.itsallprivate.bluetoothchat.domain.chat.BluetoothDeviceDomain
 import com.itsallprivate.bluetoothchat.domain.chat.BluetoothMessage
+import com.itsallprivate.bluetoothchat.domain.chat.ConnectionClosedException
 import com.itsallprivate.bluetoothchat.domain.chat.ConnectionResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
@@ -43,10 +45,6 @@ class BluetoothControllerImpl(
     private val _pairedDevices = MutableStateFlow<Set<BluetoothDeviceDomain>>(emptySet())
     override val pairedDevices: StateFlow<Set<BluetoothDeviceDomain>>
         get() = _pairedDevices.asStateFlow()
-
-    private val _errors = MutableSharedFlow<String>()
-    override val errors: SharedFlow<String>
-        get() = _errors.asSharedFlow()
 
     private val foundDeviceReceiver = FoundDeviceReceiver { device ->
         _scannedDevices.update { devices ->
@@ -110,13 +108,23 @@ class BluetoothControllerImpl(
                     val service = BluetoothDataTransferService(clientSocket)
                     dataTransferService = service
 
-                    emitAll(
-                        service
-                            .listenForIncomingMessages()
-                            .map {
-                                ConnectionResult.MessageReceived(it)
-                            }
-                    )
+                    try {
+                        emitAll(
+                            service
+                                .listenForIncomingMessages()
+                                .map {
+                                    ConnectionResult.MessageReceived(it)
+                                }
+                        )
+                    } catch (e: ConnectionClosedException) {
+                        clientSocket.close()
+                        currentClientSocket = null
+                        emit(ConnectionResult.Error(BluetoothConnectionErrorCode.CONNECTION_CLOSED))
+                    } catch (e: IOException) {
+                        clientSocket.close()
+                        currentClientSocket = null
+                        emit(ConnectionResult.Error(BluetoothConnectionErrorCode.CONNECTION_FAILED))
+                    }
                 }
             }
         }.onCompletion {
@@ -150,10 +158,14 @@ class BluetoothControllerImpl(
                                 }
                         )
                     }
+                } catch (e: ConnectionClosedException) {
+                    socket.close()
+                    currentClientSocket = null
+                    emit(ConnectionResult.Error(BluetoothConnectionErrorCode.CONNECTION_CLOSED))
                 } catch (e: IOException) {
                     socket.close()
                     currentClientSocket = null
-                    emit(ConnectionResult.Error("Connection was interrupted"))
+                    emit(ConnectionResult.Error(BluetoothConnectionErrorCode.CONNECTION_FAILED))
                 }
             }
         }.onCompletion {
