@@ -4,8 +4,9 @@ import android.content.Context
 import androidx.room.Room
 import com.itsallprivate.bluetoothchat.data.bluetooth.BluetoothControllerImpl
 import com.itsallprivate.bluetoothchat.data.local.ChatDatabase
-import com.itsallprivate.bluetoothchat.data.local.ChatRepository
+import com.itsallprivate.bluetoothchat.data.local.ChatRepositoryImpl
 import com.itsallprivate.bluetoothchat.domain.chat.BluetoothController
+import com.itsallprivate.bluetoothchat.domain.chat.ChatRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -36,6 +37,6 @@ object AppModule {
     @Provides
     @Singleton
     fun provideChatRepository(database: ChatDatabase): ChatRepository {
-        return ChatRepository(database.chatDeviceDao(), database.chatMessageDao())
+        return ChatRepositoryImpl(database.chatDeviceDao(), database.chatMessageDao())
     }
 }

@@ -7,7 +7,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.itsallprivate.bluetoothchat.Chat
-import com.itsallprivate.bluetoothchat.data.local.ChatRepository
 import com.itsallprivate.bluetoothchat.domain.chat.BluetoothConnectionErrorCode
 import com.itsallprivate.bluetoothchat.domain.chat.BluetoothConnectionErrorCode.CONNECTION_CLOSED
 import com.itsallprivate.bluetoothchat.domain.chat.BluetoothConnectionErrorCode.CONNECTION_FAILED
@@ -15,6 +14,7 @@ import com.itsallprivate.bluetoothchat.domain.chat.BluetoothConnectionErrorCode.
 import com.itsallprivate.bluetoothchat.domain.chat.BluetoothController
 import com.itsallprivate.bluetoothchat.domain.chat.BluetoothDevice
 import com.itsallprivate.bluetoothchat.domain.chat.BluetoothMessage
+import com.itsallprivate.bluetoothchat.domain.chat.ChatRepository
 import com.itsallprivate.bluetoothchat.domain.chat.ConnectionResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext

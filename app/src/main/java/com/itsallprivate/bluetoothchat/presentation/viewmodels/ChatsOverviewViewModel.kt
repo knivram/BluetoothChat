@@ -2,8 +2,8 @@ package com.itsallprivate.bluetoothchat.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.itsallprivate.bluetoothchat.data.local.ChatRepository
 import com.itsallprivate.bluetoothchat.domain.chat.ChatOverview
+import com.itsallprivate.bluetoothchat.domain.chat.ChatRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
