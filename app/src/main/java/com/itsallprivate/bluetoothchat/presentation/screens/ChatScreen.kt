@@ -84,7 +84,7 @@ fun ChatScreen(
                             )
                         }
                         Text(
-                            text = device.name ?: "Unknown Device",
+                            text = device.name,
                             overflow = TextOverflow.Ellipsis,
                             maxLines = 1,
                         )

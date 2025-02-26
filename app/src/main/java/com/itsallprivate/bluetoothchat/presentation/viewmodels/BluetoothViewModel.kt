@@ -22,11 +22,13 @@ class BluetoothViewModel @Inject constructor(
     val state = combine(
         bluetoothController.scannedDevices,
         bluetoothController.pairedDevices,
+        bluetoothController.isDiscovering,
         _state,
-    ) { scannedDevices, pairedDevices, state ->
+    ) { scannedDevices, pairedDevices, isDiscovering, state ->
         state.copy(
             scannedDevices = scannedDevices,
             pairedDevices = pairedDevices,
+            isDiscovering = isDiscovering,
         )
     }
         .onStart {
@@ -35,9 +37,9 @@ class BluetoothViewModel @Inject constructor(
         .onCompletion {
             stopScan()
         }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), _state.value)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(1000), _state.value)
 
-    private fun startScan() {
+    fun startScan() {
         bluetoothController.startDiscovery()
     }
 

@@ -2,6 +2,7 @@ package com.itsallprivate.bluetoothchat.data.bluetooth
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothServerSocket
@@ -47,6 +48,10 @@ class BluetoothControllerImpl(
     override val isConnected: StateFlow<Boolean>
         get() = _isConnected.asStateFlow()
 
+    private val _isDiscovering = MutableStateFlow(false)
+    override val isDiscovering: StateFlow<Boolean>
+        get() = _isDiscovering.asStateFlow()
+
     private val _scannedDevices = MutableStateFlow<Set<BluetoothDeviceDomain>>(emptySet())
     override val scannedDevices: StateFlow<Set<BluetoothDeviceDomain>>
         get() = _scannedDevices.asStateFlow()
@@ -56,35 +61,50 @@ class BluetoothControllerImpl(
         get() = _pairedDevices.asStateFlow()
 
     private val foundDeviceReceiver = FoundDeviceReceiver { device ->
-        device.type
         _scannedDevices.update { devices ->
-            if (device.name != null) {
-                devices + device.toBluetoothDeviceDomain()
-            } else devices
+            devices + device.toBluetoothDeviceDomain()
         }
     }
 
-    // Flag to track receiver registration status
-    private var isReceiverRegistered = false
+    private val discoveryChangedReceiver = DiscoveryChangedReceiver { isDiscovering ->
+        _isDiscovering.update { isDiscovering }
+    }
+
+    // Flag to track receivers registration status
+    private var isFoundDeviceReceiverRegistered = false
+    private var isDiscoveryChangedReceiverRegistered = false
 
     private var currentServerSocket: BluetoothServerSocket? = null
     private var currentClientSocket: BluetoothSocket? = null
+
+    init {
+        context.registerReceiver(
+            discoveryChangedReceiver,
+            IntentFilter()
+                .apply {
+                    addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED)
+                    addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
+                },
+        )
+        isDiscoveryChangedReceiverRegistered = true
+
+        context.registerReceiver(
+            foundDeviceReceiver,
+            IntentFilter(BluetoothDevice.ACTION_FOUND),
+        )
+        isFoundDeviceReceiverRegistered = true
+
+        startDiscovery()
+    }
 
     override fun startDiscovery() {
         if (!hasPermission(Manifest.permission.BLUETOOTH_SCAN)) {
             return
         }
 
-        context.registerReceiver(
-            foundDeviceReceiver,
-            IntentFilter(BluetoothDevice.ACTION_FOUND),
-        )
-        isReceiverRegistered = true
-
         updatePairedDevices()
 
         bluetoothAdapter?.startDiscovery()
-        bluetoothAdapter?.isDiscovering
     }
 
     override fun stopDiscovery() {
@@ -100,6 +120,8 @@ class BluetoothControllerImpl(
             if (!hasPermission(Manifest.permission.BLUETOOTH_CONNECT)) {
                 throw SecurityException("No BLUETOOTH_CONNECT permission")
             }
+
+            stopDiscovery()
 
             currentServerSocket = bluetoothAdapter?.listenUsingRfcommWithServiceRecord(
                 "chat_service",
@@ -150,6 +172,8 @@ class BluetoothControllerImpl(
             if (!hasPermission(Manifest.permission.BLUETOOTH_CONNECT)) {
                 throw SecurityException("No BLUETOOTH_CONNECT permission")
             }
+
+            stopDiscovery()
 
             currentClientSocket = bluetoothAdapter
                 ?.getRemoteDevice(device.address)
@@ -214,9 +238,13 @@ class BluetoothControllerImpl(
     }
 
     override fun release() {
-        if (isReceiverRegistered) {
+        if (isFoundDeviceReceiverRegistered) {
             context.unregisterReceiver(foundDeviceReceiver)
-            isReceiverRegistered = false
+            isFoundDeviceReceiverRegistered = false
+        }
+        if (isDiscoveryChangedReceiverRegistered) {
+            context.unregisterReceiver(discoveryChangedReceiver)
+            isDiscoveryChangedReceiverRegistered = false
         }
         closeConnection()
     }
