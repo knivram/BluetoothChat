@@ -8,6 +8,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
@@ -26,13 +28,20 @@ class BluetoothViewModel @Inject constructor(
             scannedDevices = scannedDevices,
             pairedDevices = pairedDevices,
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), _state.value)
+    }
+        .onStart {
+            startScan()
+        }
+        .onCompletion {
+            stopScan()
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), _state.value)
 
-    fun startScan() {
+    private fun startScan() {
         bluetoothController.startDiscovery()
     }
 
-    fun stopScan() {
+    private fun stopScan() {
         bluetoothController.stopDiscovery()
     }
 

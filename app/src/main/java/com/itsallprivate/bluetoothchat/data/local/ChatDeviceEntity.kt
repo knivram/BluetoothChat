@@ -6,5 +6,5 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "chat_devices")
 data class ChatDeviceEntity(
     @PrimaryKey val address: String,
-    val name: String?,
+    val name: String,
 )

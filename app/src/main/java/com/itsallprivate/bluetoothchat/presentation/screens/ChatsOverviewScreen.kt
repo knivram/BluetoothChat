@@ -9,32 +9,41 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.itsallprivate.bluetoothchat.BluetoothConnection
 import com.itsallprivate.bluetoothchat.Chat
 import com.itsallprivate.bluetoothchat.presentation.components.ChatOverviewItem
 import com.itsallprivate.bluetoothchat.presentation.viewmodels.ChatsOverviewViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatsOverviewScreen(
     navController: NavHostController,
 ) {
     val viewModel = hiltViewModel<ChatsOverviewViewModel>()
     val chats by viewModel.chats.collectAsState()
+
+    val sheetState = rememberModalBottomSheetState()
+    var showingBottomSheet by rememberSaveable { mutableStateOf(false) }
 
     Surface(
         color = MaterialTheme.colorScheme.background,
@@ -62,7 +71,7 @@ fun ChatsOverviewScreen(
                     )
                     IconButton(
                         onClick = {
-                            navController.navigate(BluetoothConnection)
+                            showingBottomSheet = true
                         },
                     ) {
                         Icon(
@@ -79,6 +88,20 @@ fun ChatsOverviewScreen(
                             onClick = { navController.navigate(Chat(chat.name, chat.address)) },
                         )
                     }
+                }
+            }
+
+            if (showingBottomSheet) {
+                ModalBottomSheet(
+                    sheetState = sheetState,
+                    onDismissRequest = { showingBottomSheet = false },
+                ) {
+                    DeviceList(
+                        onClick = {
+                            showingBottomSheet = false
+                            navController.navigate(Chat(it.name, it.address))
+                        },
+                    )
                 }
             }
         }

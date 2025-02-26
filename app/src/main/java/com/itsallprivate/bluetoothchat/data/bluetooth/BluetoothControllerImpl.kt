@@ -56,8 +56,11 @@ class BluetoothControllerImpl(
         get() = _pairedDevices.asStateFlow()
 
     private val foundDeviceReceiver = FoundDeviceReceiver { device ->
+        device.type
         _scannedDevices.update { devices ->
-            devices + device.toBluetoothDeviceDomain()
+            if (device.name != null) {
+                devices + device.toBluetoothDeviceDomain()
+            } else devices
         }
     }
 
@@ -66,10 +69,6 @@ class BluetoothControllerImpl(
 
     private var currentServerSocket: BluetoothServerSocket? = null
     private var currentClientSocket: BluetoothSocket? = null
-
-    init {
-        updatePairedDevices()
-    }
 
     override fun startDiscovery() {
         if (!hasPermission(Manifest.permission.BLUETOOTH_SCAN)) {
@@ -85,6 +84,7 @@ class BluetoothControllerImpl(
         updatePairedDevices()
 
         bluetoothAdapter?.startDiscovery()
+        bluetoothAdapter?.isDiscovering
     }
 
     override fun stopDiscovery() {
