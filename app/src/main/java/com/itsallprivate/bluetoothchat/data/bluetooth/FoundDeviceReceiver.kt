@@ -1,4 +1,4 @@
-package com.itsallprivate.bluetoothchat.data.chat
+package com.itsallprivate.bluetoothchat.data.bluetooth
 
 import android.bluetooth.BluetoothDevice
 import android.content.BroadcastReceiver

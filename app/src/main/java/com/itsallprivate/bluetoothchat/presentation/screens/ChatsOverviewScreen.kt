@@ -1,4 +1,4 @@
-package com.itsallprivate.bluetoothchat.presentation.components
+package com.itsallprivate.bluetoothchat.presentation.screens
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,7 +26,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.itsallprivate.bluetoothchat.BluetoothConnection
 import com.itsallprivate.bluetoothchat.Chat
-import com.itsallprivate.bluetoothchat.presentation.ChatsOverviewViewModel
+import com.itsallprivate.bluetoothchat.presentation.viewmodels.ChatsOverviewViewModel
+import com.itsallprivate.bluetoothchat.presentation.components.ChatOverviewItem
 
 @Composable
 fun ChatsOverviewScreen(
