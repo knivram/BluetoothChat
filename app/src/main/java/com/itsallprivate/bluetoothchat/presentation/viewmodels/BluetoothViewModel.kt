@@ -1,14 +1,11 @@
-package com.itsallprivate.bluetoothchat.presentation
+package com.itsallprivate.bluetoothchat.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.itsallprivate.bluetoothchat.domain.chat.BluetoothController
-import com.itsallprivate.bluetoothchat.domain.chat.BluetoothDeviceDomain
-import com.itsallprivate.bluetoothchat.domain.chat.ConnectionResult
+import com.itsallprivate.bluetoothchat.presentation.viewmodels.states.BluetoothUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel

@@ -1,4 +1,4 @@
-package com.itsallprivate.bluetoothchat.data.chat
+package com.itsallprivate.bluetoothchat.data.bluetooth
 
 import com.itsallprivate.bluetoothchat.domain.chat.BluetoothMessage
 import kotlinx.serialization.encodeToString

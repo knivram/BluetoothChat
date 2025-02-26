@@ -1,4 +1,4 @@
-package com.itsallprivate.bluetoothchat.presentation
+package com.itsallprivate.bluetoothchat.presentation.viewmodels
 
 import android.content.Context
 import android.widget.Toast

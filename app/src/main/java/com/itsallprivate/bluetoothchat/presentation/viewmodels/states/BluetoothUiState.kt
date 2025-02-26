@@ -1,7 +1,6 @@
-package com.itsallprivate.bluetoothchat.presentation
+package com.itsallprivate.bluetoothchat.presentation.viewmodels.states
 
 import com.itsallprivate.bluetoothchat.domain.chat.BluetoothDevice
-import com.itsallprivate.bluetoothchat.domain.chat.BluetoothMessage
 
 data class BluetoothUiState(
     val scannedDevices: Set<BluetoothDevice> = emptySet(),

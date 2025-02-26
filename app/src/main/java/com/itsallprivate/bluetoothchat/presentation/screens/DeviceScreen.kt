@@ -1,4 +1,4 @@
-package com.itsallprivate.bluetoothchat.presentation.components
+package com.itsallprivate.bluetoothchat.presentation.screens
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -20,7 +20,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.itsallprivate.bluetoothchat.Chat
 import com.itsallprivate.bluetoothchat.domain.chat.BluetoothDevice
-import com.itsallprivate.bluetoothchat.presentation.BluetoothViewModel
+import com.itsallprivate.bluetoothchat.presentation.viewmodels.BluetoothViewModel
 
 @Composable
 fun DeviceScreen(

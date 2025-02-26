@@ -1,4 +1,4 @@
-package com.itsallprivate.bluetoothchat.presentation
+package com.itsallprivate.bluetoothchat.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

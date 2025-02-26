@@ -2,7 +2,7 @@ package com.itsallprivate.bluetoothchat.di
 
 import android.content.Context
 import androidx.room.Room
-import com.itsallprivate.bluetoothchat.data.chat.BluetoothControllerImpl
+import com.itsallprivate.bluetoothchat.data.bluetooth.BluetoothControllerImpl
 import com.itsallprivate.bluetoothchat.data.local.ChatDatabase
 import com.itsallprivate.bluetoothchat.data.local.ChatRepository
 import com.itsallprivate.bluetoothchat.domain.chat.BluetoothController
