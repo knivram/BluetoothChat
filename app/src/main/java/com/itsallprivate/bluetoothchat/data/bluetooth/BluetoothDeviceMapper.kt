@@ -8,6 +8,6 @@ import com.itsallprivate.bluetoothchat.domain.chat.BluetoothDeviceDomain
 fun BluetoothDevice.toBluetoothDeviceDomain(): BluetoothDeviceDomain {
     return BluetoothDeviceDomain(
         name = name,
-        address = address
+        address = address,
     )
 }

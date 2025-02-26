@@ -26,8 +26,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.itsallprivate.bluetoothchat.BluetoothConnection
 import com.itsallprivate.bluetoothchat.Chat
-import com.itsallprivate.bluetoothchat.presentation.viewmodels.ChatsOverviewViewModel
 import com.itsallprivate.bluetoothchat.presentation.components.ChatOverviewItem
+import com.itsallprivate.bluetoothchat.presentation.viewmodels.ChatsOverviewViewModel
 
 @Composable
 fun ChatsOverviewScreen(
@@ -37,28 +37,28 @@ fun ChatsOverviewScreen(
     val chats by viewModel.chats.collectAsState()
 
     Surface(
-        color = MaterialTheme.colorScheme.background
+        color = MaterialTheme.colorScheme.background,
     ) {
         Scaffold(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
         ) { innerPadding ->
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding)
+                    .padding(innerPadding),
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
                         text = "Chats",
                         style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.Medium
+                            fontWeight = FontWeight.Medium,
                         ),
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
                     )
                     IconButton(
                         onClick = {
@@ -68,7 +68,7 @@ fun ChatsOverviewScreen(
                         Icon(
                             imageVector = Icons.Default.AddCircle,
                             contentDescription = "Add",
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = MaterialTheme.colorScheme.primary,
                         )
                     }
                 }
@@ -76,7 +76,7 @@ fun ChatsOverviewScreen(
                     items(chats) { chat ->
                         ChatOverviewItem(
                             chatOverview = chat,
-                            onClick = { navController.navigate(Chat(chat.name, chat.address)) }
+                            onClick = { navController.navigate(Chat(chat.name, chat.address)) },
                         )
                     }
                 }

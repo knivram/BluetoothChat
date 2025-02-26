@@ -30,7 +30,7 @@ object AppModule {
         return Room.databaseBuilder(
             context,
             ChatDatabase::class.java,
-            "chat_database"
+            "chat_database",
         ).build()
     }
 

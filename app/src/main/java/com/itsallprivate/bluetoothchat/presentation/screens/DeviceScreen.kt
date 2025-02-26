@@ -1,7 +1,12 @@
 package com.itsallprivate.bluetoothchat.presentation.screens
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
@@ -24,37 +29,37 @@ import com.itsallprivate.bluetoothchat.presentation.viewmodels.BluetoothViewMode
 
 @Composable
 fun DeviceScreen(
-    navController: NavHostController
+    navController: NavHostController,
 ) {
     val viewModel = hiltViewModel<BluetoothViewModel>()
     val state by viewModel.state.collectAsState()
 
     Surface(
-        color = MaterialTheme.colorScheme.background
+        color = MaterialTheme.colorScheme.background,
     ) {
         Scaffold(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
         ) { innerPadding ->
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding)
+                    .padding(innerPadding),
             ) {
                 BluetoothDeviceList(
                     pairedDevices = state.pairedDevices.toList(),
                     scannedDevices = state.scannedDevices.toList(),
                     onClick = {
                         navController.navigate(
-                            Chat(name = it.name, address = it.address)
+                            Chat(name = it.name, address = it.address),
                         )
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f)
+                        .weight(1f),
                 )
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceAround
+                    horizontalArrangement = Arrangement.SpaceAround,
                 ) {
                     Button(onClick = viewModel::startScan) {
                         Text(text = "Start scan")
@@ -73,17 +78,17 @@ fun BluetoothDeviceList(
     pairedDevices: List<BluetoothDevice>,
     scannedDevices: List<BluetoothDevice>,
     onClick: (BluetoothDevice) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     LazyColumn(
-        modifier = modifier
+        modifier = modifier,
     ) {
         item {
             Text(
                 text = "Paired Devices",
                 fontWeight = FontWeight.Bold,
                 fontSize = 24.sp,
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier.padding(16.dp),
             )
         }
         items(pairedDevices) { device ->
@@ -92,7 +97,7 @@ fun BluetoothDeviceList(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { onClick(device) }
-                    .padding(16.dp)
+                    .padding(16.dp),
             )
         }
 
@@ -101,7 +106,7 @@ fun BluetoothDeviceList(
                 text = "Scanned Devices",
                 fontWeight = FontWeight.Bold,
                 fontSize = 24.sp,
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier.padding(16.dp),
             )
         }
         items(scannedDevices) { device ->
@@ -110,7 +115,7 @@ fun BluetoothDeviceList(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { onClick(device) }
-                    .padding(16.dp)
+                    .padding(16.dp),
             )
         }
     }

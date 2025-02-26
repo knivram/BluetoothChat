@@ -7,8 +7,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
@@ -49,7 +49,7 @@ fun ChatOverviewItem(
             Text(
                 text = getInitials(chatOverview.name ?: chatOverview.address),
                 style = MaterialTheme.typography.bodyLarge,
-                color = Color.White
+                color = Color.White,
             )
         }
         Spacer(modifier = Modifier.width(16.dp))
@@ -74,7 +74,7 @@ fun ChatOverviewItem(
                 }
             }
             chatOverview.latestMessage?.let {
-                val textPrefix = if(it.isFromLocalUser) "You: " else ""
+                val textPrefix = if (it.isFromLocalUser) "You: " else ""
                 Text(
                     text = textPrefix + it.message,
                     style = MaterialTheme.typography.bodySmall,
@@ -93,7 +93,9 @@ fun getInitials(name: String): String {
         "${parts.first().first().uppercaseChar()}${parts.last().first().uppercaseChar()}"
     } else if (parts.isNotEmpty()) {
         parts.first().first().uppercaseChar().toString()
-    } else ""
+    } else {
+        ""
+    }
 }
 
 fun formatDateTime(dateTime: LocalDateTime): String {
@@ -110,12 +112,12 @@ fun ChatOverviewItemPreview() {
     val sampleMessage = BluetoothMessage(
         message = "Hello from sample chat! This is a longer message to test the width constraints.",
         isFromLocalUser = false,
-        dateTime = LocalDateTime.now().minusHours(1)
+        dateTime = LocalDateTime.now().minusHours(1),
     )
     val sampleOverview = ChatOverview(
         name = "James Alexander Carter",
         address = "00:11:22:33:44:55",
-        latestMessage = sampleMessage
+        latestMessage = sampleMessage,
     )
     ChatOverviewItem(chatOverview = sampleOverview, onClick = {}, modifier = Modifier.width(300.dp))
 }

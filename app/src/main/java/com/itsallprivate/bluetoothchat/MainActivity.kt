@@ -35,20 +35,22 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val enableBluetoothLauncher = registerForActivityResult(
-            ActivityResultContracts.StartActivityForResult()
+            ActivityResultContracts.StartActivityForResult(),
         ) { /* Not needed */ }
 
         val permissionLauncher = registerForActivityResult(
-            ActivityResultContracts.RequestMultiplePermissions()
+            ActivityResultContracts.RequestMultiplePermissions(),
         ) { perms ->
             val canEnableBluetooth = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 perms[Manifest.permission.BLUETOOTH_CONNECT] == true
-            } else true
+            } else {
+                true
+            }
 
             if (canEnableBluetooth && !isBluetoothEnabled) {
                 // ask user to turn on bluetooth
                 enableBluetoothLauncher.launch(
-                    Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+                    Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE),
                 )
             }
         }
@@ -58,7 +60,7 @@ class MainActivity : ComponentActivity() {
                 arrayOf(
                     Manifest.permission.BLUETOOTH_SCAN,
                     Manifest.permission.BLUETOOTH_CONNECT,
-                )
+                ),
             )
         }
 

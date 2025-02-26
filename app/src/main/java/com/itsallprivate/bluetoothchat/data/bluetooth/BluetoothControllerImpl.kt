@@ -16,14 +16,23 @@ import com.itsallprivate.bluetoothchat.domain.chat.BluetoothMessage
 import com.itsallprivate.bluetoothchat.domain.chat.ConnectionClosedException
 import com.itsallprivate.bluetoothchat.domain.chat.ConnectionResult
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.update
 import java.io.IOException
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 @SuppressLint("MissingPermission")
 class BluetoothControllerImpl(
-    private val context: Context
+    private val context: Context,
 ) : BluetoothController {
 
     private val bluetoothManager: BluetoothManager? by lazy {
@@ -69,7 +78,7 @@ class BluetoothControllerImpl(
 
         context.registerReceiver(
             foundDeviceReceiver,
-            IntentFilter(BluetoothDevice.ACTION_FOUND)
+            IntentFilter(BluetoothDevice.ACTION_FOUND),
         )
         isReceiverRegistered = true
 
@@ -94,7 +103,7 @@ class BluetoothControllerImpl(
 
             currentServerSocket = bluetoothAdapter?.listenUsingRfcommWithServiceRecord(
                 "chat_service",
-                UUID.fromString(SERVICE_UUID)
+                UUID.fromString(SERVICE_UUID),
             )
 
             var shouldLoop = true
@@ -118,7 +127,7 @@ class BluetoothControllerImpl(
                                 .listenForIncomingMessages()
                                 .map {
                                     ConnectionResult.MessageReceived(it)
-                                }
+                                },
                         )
                     } catch (e: ConnectionClosedException) {
                         clientSocket.close()
@@ -145,7 +154,7 @@ class BluetoothControllerImpl(
             currentClientSocket = bluetoothAdapter
                 ?.getRemoteDevice(device.address)
                 ?.createRfcommSocketToServiceRecord(
-                    UUID.fromString(SERVICE_UUID)
+                    UUID.fromString(SERVICE_UUID),
                 )
             stopDiscovery()
 
@@ -159,7 +168,7 @@ class BluetoothControllerImpl(
                             service.listenForIncomingMessages()
                                 .map { message ->
                                     ConnectionResult.MessageReceived(message)
-                                }
+                                },
                         )
                     }
                 } catch (e: ConnectionClosedException) {
@@ -186,7 +195,7 @@ class BluetoothControllerImpl(
             val bluetoothMessage = BluetoothMessage(
                 message = message,
                 isFromLocalUser = true,
-                dateTime = LocalDateTime.now()
+                dateTime = LocalDateTime.now(),
             )
             val successful = service.sendMessage(bluetoothMessage.toByteArray())
             if (successful) {
