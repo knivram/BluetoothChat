@@ -7,6 +7,7 @@ plugins {
     id("dagger.hilt.android.plugin")
     id("com.google.devtools.ksp")
     kotlin("plugin.serialization") version "2.0.21"
+    id("org.jlleitschuh.gradle.ktlint") version "11.5.1"
 }
 
 android {
