@@ -7,7 +7,7 @@ enum class BluetoothConnectionErrorCode {
 }
 
 sealed interface ConnectionResult {
-    data class ConnectionEstablished(val device: BluetoothDevice): ConnectionResult
-    data class Error(val errorCode: BluetoothConnectionErrorCode): ConnectionResult
-    data class MessageReceived(val message: BluetoothMessage): ConnectionResult
+    data class ConnectionEstablished(val device: BluetoothDevice) : ConnectionResult
+    data class Error(val errorCode: BluetoothConnectionErrorCode) : ConnectionResult
+    data class MessageReceived(val message: BluetoothMessage) : ConnectionResult
 }

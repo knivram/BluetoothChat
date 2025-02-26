@@ -1,7 +1,6 @@
 package com.itsallprivate.bluetoothchat.domain.chat
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 
 interface BluetoothController {

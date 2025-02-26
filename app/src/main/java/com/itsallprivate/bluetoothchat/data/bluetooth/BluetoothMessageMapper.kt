@@ -6,7 +6,7 @@ import kotlinx.serialization.json.Json
 
 fun String.toBluetoothMessage(isFromLocalUser: Boolean): BluetoothMessage {
     return Json.decodeFromString<BluetoothMessage>(this).copy(
-        isFromLocalUser = isFromLocalUser
+        isFromLocalUser = isFromLocalUser,
     )
 }
 

@@ -9,7 +9,7 @@ import kotlinx.coroutines.withContext
 
 class ChatRepositoryImpl(
     private val chatDeviceDao: ChatDeviceDao,
-    private val chatMessageDao: ChatMessageDao
+    private val chatMessageDao: ChatMessageDao,
 ) : ChatRepository {
 
     override suspend fun addMessage(device: BluetoothDevice, message: BluetoothMessage) {
@@ -17,8 +17,8 @@ class ChatRepositoryImpl(
             chatDeviceDao.insertIfNotExists(
                 ChatDeviceEntity(
                     address = device.address,
-                    name = device.name
-                )
+                    name = device.name,
+                ),
             )
             chatMessageDao.insert(
                 ChatMessageEntity(
@@ -26,7 +26,7 @@ class ChatRepositoryImpl(
                     message = message.message,
                     isFromLocalUser = message.isFromLocalUser,
                     dateTime = message.dateTime,
-                )
+                ),
             )
         }
     }
@@ -48,7 +48,7 @@ class ChatRepositoryImpl(
             chatDeviceDao.getAll().map {
                 BluetoothDevice(
                     name = it.name,
-                    address = it.address
+                    address = it.address,
                 )
             }
         }
@@ -62,13 +62,13 @@ class ChatRepositoryImpl(
                     BluetoothMessage(
                         message = entity.message,
                         isFromLocalUser = entity.isFromLocalUser,
-                        dateTime = entity.dateTime
+                        dateTime = entity.dateTime,
                     )
                 }
                 ChatOverview(
                     name = deviceEntity.name,
                     address = deviceEntity.address,
-                    latestMessage = latestMessage
+                    latestMessage = latestMessage,
                 )
             }.sortedByDescending { it.latestMessage?.dateTime }
         }

@@ -22,13 +22,11 @@ import com.itsallprivate.bluetoothchat.ui.theme.Vanilla
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-
 @Composable
 fun ChatMessage(
     message: BluetoothMessage,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
-
     Column(
         modifier = modifier
             .clip(
@@ -36,24 +34,24 @@ fun ChatMessage(
                     topStart = if (message.isFromLocalUser) 15.dp else 1.dp,
                     topEnd = 15.dp,
                     bottomStart = 15.dp,
-                    bottomEnd = if (message.isFromLocalUser) 1.dp else 15.dp
-                )
+                    bottomEnd = if (message.isFromLocalUser) 1.dp else 15.dp,
+                ),
             )
             .background(
-                if (message.isFromLocalUser) OldRose else Vanilla
+                if (message.isFromLocalUser) OldRose else Vanilla,
             )
-            .padding(12.dp)
+            .padding(12.dp),
     ) {
         Text(
             text = message.message,
             color = Color.Black,
-            modifier = Modifier.widthIn(min= 80.dp, max = 250.dp)
+            modifier = Modifier.widthIn(min = 80.dp, max = 250.dp),
         )
         Text(
             text = message.dateTime.formatToMessage(),
             fontSize = 10.sp,
             color = Color.Black,
-            modifier = Modifier.align(Alignment.End)
+            modifier = Modifier.align(Alignment.End),
         )
     }
 }
@@ -69,21 +67,21 @@ fun LocalDateTime.formatToMessage(): String {
 fun ChatMessagePreview() {
     BluetoothChatTheme {
         Column(
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             ChatMessage(
                 message = BluetoothMessage(
                     message = "Hi",
                     isFromLocalUser = true,
-                    dateTime = LocalDateTime.now().minusDays(1)
-                )
+                    dateTime = LocalDateTime.now().minusDays(1),
+                ),
             )
             ChatMessage(
                 message = BluetoothMessage(
                     message = "Hello, this is a longer message to test the width constraints.",
                     isFromLocalUser = true,
-                    dateTime = LocalDateTime.now()
-                )
+                    dateTime = LocalDateTime.now(),
+                ),
             )
         }
     }

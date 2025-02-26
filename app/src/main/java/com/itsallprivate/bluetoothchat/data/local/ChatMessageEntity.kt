@@ -10,5 +10,5 @@ data class ChatMessageEntity(
     val deviceAddress: String,
     val message: String,
     val isFromLocalUser: Boolean,
-    val dateTime: LocalDateTime
+    val dateTime: LocalDateTime,
 )

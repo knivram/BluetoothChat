@@ -36,9 +36,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.itsallprivate.bluetoothchat.presentation.components.ChatMessage
 import com.itsallprivate.bluetoothchat.presentation.viewmodels.ChatViewModel
 import com.itsallprivate.bluetoothchat.presentation.viewmodels.ConnectionStatus
-import com.itsallprivate.bluetoothchat.presentation.components.ChatMessage
 
 @Composable
 fun ChatScreen(
@@ -53,15 +53,15 @@ fun ChatScreen(
     val keyboardController = LocalSoftwareKeyboardController.current
 
     Surface(
-        color = MaterialTheme.colorScheme.background
+        color = MaterialTheme.colorScheme.background,
     ) {
         Scaffold(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
         ) { innerPadding ->
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding)
+                    .padding(innerPadding),
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -70,17 +70,17 @@ fun ChatScreen(
                     Row(
                         modifier = Modifier.weight(1f),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
                         IconButton(
                             onClick = {
                                 viewModel.disconnectFromDevice()
                                 navController.popBackStack()
-                            }
+                            },
                         ) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                                contentDescription = "Back"
+                                contentDescription = "Back",
                             )
                         }
                         Text(
@@ -100,7 +100,7 @@ fun ChatScreen(
                                     modifier = Modifier
                                         .height(24.dp)
                                         .width(24.dp),
-                                    strokeWidth = 2.dp
+                                    strokeWidth = 2.dp,
                                 )
                                 Button(viewModel::disconnectFromDevice) {
                                     Text("Cancel")
@@ -129,21 +129,20 @@ fun ChatScreen(
                         .fillMaxWidth()
                         .weight(1f),
                     contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     items(messages) { message ->
                         Column(
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
                         ) {
                             ChatMessage(
                                 message = message,
                                 modifier = Modifier.align(
-                                    if (message.isFromLocalUser) Alignment.End else Alignment.Start
-                                )
+                                    if (message.isFromLocalUser) Alignment.End else Alignment.Start,
+                                ),
                             )
                         }
                     }
-
                 }
 
                 Row(
@@ -156,7 +155,7 @@ fun ChatScreen(
                         value = message,
                         onValueChange = { message = it },
                         modifier = Modifier.weight(1f),
-                        placeholder = { Text("Message") }
+                        placeholder = { Text("Message") },
                     )
 
                     IconButton(
@@ -165,11 +164,11 @@ fun ChatScreen(
                             keyboardController?.hide()
                             message = ""
                         },
-                        enabled = message.isNotBlank() && status == ConnectionStatus.CONNECTED
+                        enabled = message.isNotBlank() && status == ConnectionStatus.CONNECTED,
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Default.Send,
-                            contentDescription = "Send"
+                            contentDescription = "Send",
                         )
                     }
                 }

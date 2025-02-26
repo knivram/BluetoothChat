@@ -150,7 +150,7 @@ class ChatViewModel @Inject constructor(
         Toast.makeText(
             context,
             message,
-            Toast.LENGTH_LONG
+            Toast.LENGTH_LONG,
         ).show()
     }
 
