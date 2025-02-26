@@ -2,16 +2,21 @@ package com.itsallprivate.bluetoothchat.presentation.screens
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -47,7 +52,28 @@ fun DeviceList(
             }
 
             item {
-                Title("Scanned Devices")
+                Row(
+                    modifier = modifier.padding(end = 24.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Title(text = "Scanned Devices", modifier = Modifier.weight(1f))
+                    if (state.isDiscovering) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .height(16.dp)
+                                .width(16.dp),
+                            strokeWidth = 2.dp,
+                        )
+                    } else {
+                        Text(
+                            text = "Update",
+                            fontSize = 14.sp,
+                            modifier = Modifier.clickable {
+                                viewModel.startScan()
+                            },
+                        )
+                    }
+                }
             }
             if (state.scannedDevices.isEmpty()) {
                 item {
@@ -59,6 +85,7 @@ fun DeviceList(
                         textAlign = TextAlign.Center,
                     )
                 }
+            } else {
                 items(state.scannedDevices.sortedByDescending { it.name }) { device ->
                     DeviceItem(
                         device = device,
@@ -73,13 +100,14 @@ fun DeviceList(
 @Composable
 private fun Title(
     text: String,
+    modifier: Modifier = Modifier,
 ) {
     Text(
         text = text,
         color = Color.DarkGray,
         fontWeight = FontWeight.Medium,
         fontSize = 14.sp,
-        modifier = Modifier
+        modifier = modifier
             .padding(horizontal = 16.dp)
             .padding(top = 16.dp, bottom = 4.dp),
     )
