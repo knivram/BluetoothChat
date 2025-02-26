@@ -1,16 +1,18 @@
 package com.itsallprivate.bluetoothchat.data.local
 
-import com.itsallprivate.bluetoothchat.domain.chat.BluetoothDeviceDomain
+import com.itsallprivate.bluetoothchat.domain.chat.BluetoothDevice
 import com.itsallprivate.bluetoothchat.domain.chat.BluetoothMessage
 import com.itsallprivate.bluetoothchat.domain.chat.ChatOverview
+import com.itsallprivate.bluetoothchat.domain.chat.ChatRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class ChatRepository(
+class ChatRepositoryImpl(
     private val chatDeviceDao: ChatDeviceDao,
     private val chatMessageDao: ChatMessageDao
-) {
-    suspend fun addMessage(device: BluetoothDeviceDomain, message: BluetoothMessage) {
+) : ChatRepository {
+
+    override suspend fun addMessage(device: BluetoothDevice, message: BluetoothMessage) {
         withContext(Dispatchers.IO) {
             chatDeviceDao.insertIfNotExists(
                 ChatDeviceEntity(
@@ -29,7 +31,7 @@ class ChatRepository(
         }
     }
 
-    suspend fun getMessagesForDevice(address: String): List<BluetoothMessage> {
+    override suspend fun getMessagesForDevice(address: String): List<BluetoothMessage> {
         return withContext(Dispatchers.IO) {
             chatMessageDao.getByAddress(address).map {
                 BluetoothMessage(
@@ -41,10 +43,10 @@ class ChatRepository(
         }
     }
 
-    suspend fun getAllDevices(): List<BluetoothDeviceDomain> {
+    override suspend fun getAllDevices(): List<BluetoothDevice> {
         return withContext(Dispatchers.IO) {
             chatDeviceDao.getAll().map {
-                BluetoothDeviceDomain(
+                BluetoothDevice(
                     name = it.name,
                     address = it.address
                 )
@@ -52,7 +54,7 @@ class ChatRepository(
         }
     }
 
-    suspend fun getChatOverviews(): List<ChatOverview> {
+    override suspend fun getChatOverviews(): List<ChatOverview> {
         return withContext(Dispatchers.IO) {
             chatDeviceDao.getAll().map { deviceEntity ->
                 val latestMessageEntity = chatMessageDao.getLatestMessageForDevice(deviceEntity.address)
