@@ -21,10 +21,14 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -33,6 +37,7 @@ enum class ConnectionStatus {
     CONNECTING,
     CONNECTED,
     DISCONNECTED,
+    DISCOVERABLE,
 }
 
 @HiltViewModel
@@ -46,7 +51,12 @@ class ChatViewModel @Inject constructor(
     val messages = _messages.asStateFlow()
 
     private val _status = MutableStateFlow(ConnectionStatus.CONNECTING)
-    val status = _status.asStateFlow()
+    val status = _status
+        .onStart {
+            waitForIncomingConnections()
+        }.onCompletion {
+            disconnectFromDevice()
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(1000), _status.value)
 
     val device by lazy {
         try {
@@ -79,7 +89,7 @@ class ChatViewModel @Inject constructor(
     }
 
     fun disconnectFromDevice() {
-        bluetoothController.closeConnection()
+        bluetoothController.closeAllConnections()
         deviceConnectionJob?.cancel()
         _status.update { ConnectionStatus.DISCONNECTED }
     }
@@ -92,7 +102,7 @@ class ChatViewModel @Inject constructor(
     }
 
     fun waitForIncomingConnections() {
-        _status.update { ConnectionStatus.CONNECTING }
+        _status.update { ConnectionStatus.DISCOVERABLE }
         deviceConnectionJob = bluetoothController
             .startBluetoothServer()
             .listen()
@@ -117,7 +127,7 @@ class ChatViewModel @Inject constructor(
                         _status.update { ConnectionStatus.CONNECTED }
                     } else {
                         showToast(WRONG_DEVICE)
-                        bluetoothController.closeConnection()
+                        bluetoothController.closeAllConnections()
                         deviceConnectionJob?.cancel()
                         _status.update { ConnectionStatus.DISCONNECTED }
                     }
@@ -136,7 +146,7 @@ class ChatViewModel @Inject constructor(
                 }
             }
         }.catch { throwable ->
-            bluetoothController.closeConnection()
+            bluetoothController.closeAllConnections()
             _status.update { ConnectionStatus.DISCONNECTED }
         }.launchIn(viewModelScope)
     }

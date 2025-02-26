@@ -17,6 +17,6 @@ interface BluetoothController {
 
     suspend fun trySendMessage(message: String): BluetoothMessage?
 
-    fun closeConnection()
+    fun closeAllConnections()
     fun release()
 }

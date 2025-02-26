@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -102,23 +103,40 @@ fun ChatScreen(
                                         .width(24.dp),
                                     strokeWidth = 2.dp,
                                 )
-                                Button(viewModel::disconnectFromDevice) {
+                                Button(
+                                    viewModel::disconnectFromDevice,
+                                    colors = ButtonDefaults.filledTonalButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.errorContainer,
+                                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                                    ),
+                                ) {
                                     Text("Cancel")
                                 }
                             }
 
                             ConnectionStatus.CONNECTED -> {
-                                Button(onClick = viewModel::disconnectFromDevice) {
+                                Button(
+                                    onClick = viewModel::disconnectFromDevice,
+                                    colors = ButtonDefaults.filledTonalButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.errorContainer,
+                                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                                    ),
+                                ) {
                                     Text("Disconnect")
                                 }
                             }
 
-                            ConnectionStatus.DISCONNECTED -> {
-                                Button(onClick = viewModel::connectConnectToDevice) {
+                            ConnectionStatus.DISCOVERABLE -> {
+                                Button(
+                                    onClick = viewModel::connectConnectToDevice,
+                                ) {
                                     Text("Connect")
                                 }
+                            }
+
+                            ConnectionStatus.DISCONNECTED -> {
                                 Button(onClick = viewModel::waitForIncomingConnections) {
-                                    Text("Server")
+                                    Text("Make Discoverable")
                                 }
                             }
                         }

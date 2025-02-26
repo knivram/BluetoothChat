@@ -130,13 +130,12 @@ class BluetoothControllerImpl(
 
             var shouldLoop = true
             while (shouldLoop) {
-                currentClientSocket = try {
-                    currentServerSocket?.accept()?.also {
+                try {
+                    currentClientSocket = currentServerSocket?.accept()?.also {
                         emit(ConnectionResult.ConnectionEstablished(it.remoteDevice.toBluetoothDeviceDomain()))
                     }
                 } catch (e: IOException) {
                     shouldLoop = false
-                    null
                 }
                 currentClientSocket?.let { clientSocket ->
                     currentServerSocket?.close()
@@ -163,7 +162,7 @@ class BluetoothControllerImpl(
                 }
             }
         }.onCompletion {
-            closeConnection()
+            closeServerSocket()
         }.flowOn(Dispatchers.IO)
     }
 
@@ -180,10 +179,10 @@ class BluetoothControllerImpl(
                 ?.createRfcommSocketToServiceRecord(
                     UUID.fromString(SERVICE_UUID),
                 )
-            stopDiscovery()
 
             currentClientSocket?.let { socket ->
                 try {
+                    currentServerSocket?.close()
                     socket.connect()
                     emit(ConnectionResult.ConnectionEstablished(socket.remoteDevice.toBluetoothDeviceDomain()))
                     BluetoothDataTransferService(socket).also { service ->
@@ -206,7 +205,7 @@ class BluetoothControllerImpl(
                 }
             }
         }.onCompletion {
-            closeConnection()
+            closeClientSocket()
         }.flowOn(Dispatchers.IO)
     }
 
@@ -230,11 +229,19 @@ class BluetoothControllerImpl(
         }
     }
 
-    override fun closeConnection() {
+    private fun closeClientSocket() {
         currentClientSocket?.close()
-        currentServerSocket?.close()
         currentClientSocket = null
+    }
+
+    private fun closeServerSocket() {
+        currentServerSocket?.close()
         currentServerSocket = null
+    }
+
+    override fun closeAllConnections() {
+        closeClientSocket()
+        closeServerSocket()
     }
 
     override fun release() {
@@ -246,7 +253,7 @@ class BluetoothControllerImpl(
             context.unregisterReceiver(discoveryChangedReceiver)
             isDiscoveryChangedReceiverRegistered = false
         }
-        closeConnection()
+        closeAllConnections()
     }
 
     private fun updatePairedDevices() {
