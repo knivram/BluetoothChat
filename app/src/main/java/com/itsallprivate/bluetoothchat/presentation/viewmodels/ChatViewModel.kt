@@ -102,7 +102,7 @@ class ChatViewModel @Inject constructor(
         viewModelScope.launch {
             bluetoothController.trySendMessage(message)?.let { bluetoothMessage ->
                 _messages.update {
-                    it + bluetoothMessage
+                    listOf(bluetoothMessage) + it
                 }
                 chatRepository.addMessage(device, bluetoothMessage)
             }
@@ -130,7 +130,7 @@ class ChatViewModel @Inject constructor(
 
                 is ConnectionResult.MessageReceived -> {
                     _messages.update {
-                        it + result.message
+                        listOf(result.message) + it
                     }
                     chatRepository.addMessage(device, result.message)
                 }

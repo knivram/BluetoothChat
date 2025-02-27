@@ -148,6 +148,7 @@ fun ChatScreen(
                         .weight(1f),
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
+                    reverseLayout = true,
                 ) {
                     items(messages) { message ->
                         Column(
