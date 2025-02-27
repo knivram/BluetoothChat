@@ -1,22 +1,18 @@
 package com.itsallprivate.bluetoothchat.presentation.screens
 
+import android.app.Activity
+import android.view.WindowManager
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -25,6 +21,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,12 +29,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.itsallprivate.bluetoothchat.presentation.components.ChatMessage
+import com.itsallprivate.bluetoothchat.presentation.components.ChatTopBar
 import com.itsallprivate.bluetoothchat.presentation.viewmodels.ChatViewModel
 import com.itsallprivate.bluetoothchat.presentation.viewmodels.ConnectionStatus
 
@@ -52,6 +50,20 @@ fun ChatScreen(
 
     var message by rememberSaveable { mutableStateOf("") }
     val keyboardController = LocalSoftwareKeyboardController.current
+    val context = LocalContext.current
+
+    // Ensure only the chat list shrinks when the keyboard shows,
+    // keeping the top bar fixed.
+    DisposableEffect(context) {
+        val activity = context as? Activity
+        val originalSoftInputMode = activity?.window?.attributes?.softInputMode
+        activity?.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+        onDispose {
+            activity?.window?.setSoftInputMode(
+                originalSoftInputMode ?: WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE,
+            )
+        }
+    }
 
     Surface(
         color = MaterialTheme.colorScheme.background,
@@ -64,84 +76,17 @@ fun ChatScreen(
                     .fillMaxSize()
                     .padding(innerPadding),
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Row(
-                        modifier = Modifier.weight(1f),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    ) {
-                        IconButton(
-                            onClick = {
-                                viewModel.disconnectFromDevice()
-                                navController.popBackStack()
-                            },
-                        ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                                contentDescription = "Back",
-                            )
-                        }
-                        Text(
-                            text = device.name,
-                            overflow = TextOverflow.Ellipsis,
-                            maxLines = 1,
-                        )
-                    }
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                    ) {
-                        when (status) {
-                            ConnectionStatus.CONNECTING -> {
-                                CircularProgressIndicator(
-                                    modifier = Modifier
-                                        .height(24.dp)
-                                        .width(24.dp),
-                                    strokeWidth = 2.dp,
-                                )
-                                Button(
-                                    viewModel::disconnectFromDevice,
-                                    colors = ButtonDefaults.filledTonalButtonColors(
-                                        containerColor = MaterialTheme.colorScheme.errorContainer,
-                                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                                    ),
-                                ) {
-                                    Text("Cancel")
-                                }
-                            }
-
-                            ConnectionStatus.CONNECTED -> {
-                                Button(
-                                    onClick = viewModel::disconnectFromDevice,
-                                    colors = ButtonDefaults.filledTonalButtonColors(
-                                        containerColor = MaterialTheme.colorScheme.errorContainer,
-                                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                                    ),
-                                ) {
-                                    Text("Disconnect")
-                                }
-                            }
-
-                            ConnectionStatus.DISCOVERABLE -> {
-                                Button(
-                                    onClick = viewModel::connectConnectToDevice,
-                                ) {
-                                    Text("Connect")
-                                }
-                            }
-
-                            ConnectionStatus.DISCONNECTED -> {
-                                Button(onClick = viewModel::waitForIncomingConnections) {
-                                    Text("Make discoverable")
-                                }
-                            }
-                        }
-                    }
-                }
+                ChatTopBar(
+                    title = device.name,
+                    status = status,
+                    onBackAction = {
+                        viewModel.disconnectFromDevice()
+                        navController.popBackStack()
+                    },
+                    onDisconnect = viewModel::disconnectFromDevice,
+                    onConnect = viewModel::connectConnectToDevice,
+                    onMakeDiscoverable = viewModel::waitForIncomingConnections,
+                )
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -167,7 +112,7 @@ fun ChatScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
+                        .padding(horizontal = 16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     TextField(
