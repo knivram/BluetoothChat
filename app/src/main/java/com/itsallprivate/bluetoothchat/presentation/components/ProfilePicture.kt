@@ -34,6 +34,7 @@ fun ProfilePicture(
 }
 
 private fun getInitials(name: String): String {
+    if (name.isBlank()) return ""
     val parts = name.trim().split("\\s+".toRegex())
     return if (parts.size >= 2) {
         "${parts.first().first().uppercaseChar()}${parts.last().first().uppercaseChar()}"

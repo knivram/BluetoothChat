@@ -34,6 +34,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.itsallprivate.bluetoothchat.Profile
 import com.itsallprivate.bluetoothchat.presentation.components.ChatMessage
 import com.itsallprivate.bluetoothchat.presentation.components.ChatTopBar
 import com.itsallprivate.bluetoothchat.presentation.viewmodels.ChatViewModel
@@ -82,6 +83,9 @@ fun ChatScreen(
                     onBackAction = {
                         viewModel.disconnectFromDevice()
                         navController.popBackStack()
+                    },
+                    onProfile = {
+                        navController.navigate(Profile(device.address))
                     },
                     onDisconnect = viewModel::disconnectFromDevice,
                     onConnect = viewModel::connectConnectToDevice,

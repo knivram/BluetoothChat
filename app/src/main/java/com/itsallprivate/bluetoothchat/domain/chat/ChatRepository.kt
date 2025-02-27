@@ -5,4 +5,6 @@ interface ChatRepository {
     suspend fun getMessagesForDevice(address: String): List<BluetoothMessage>
     suspend fun getAllDevices(): List<BluetoothDevice>
     suspend fun getChatOverviews(): List<ChatOverview>
+    suspend fun getDevice(address: String): BluetoothDevice
+    suspend fun updateDevice(device: BluetoothDevice): BluetoothDevice
 }

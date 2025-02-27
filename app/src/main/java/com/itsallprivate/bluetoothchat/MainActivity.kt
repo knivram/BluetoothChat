@@ -14,6 +14,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.itsallprivate.bluetoothchat.presentation.screens.ChatScreen
 import com.itsallprivate.bluetoothchat.presentation.screens.ChatsOverviewScreen
+import com.itsallprivate.bluetoothchat.presentation.screens.ProfileScreen
 import com.itsallprivate.bluetoothchat.ui.theme.BluetoothChatTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.serialization.Serializable
@@ -79,6 +80,9 @@ class MainActivity : ComponentActivity() {
                     composable<Chat> {
                         ChatScreen(navController)
                     }
+                    composable<Profile> {
+                        ProfileScreen(navController)
+                    }
                 }
             }
         }
@@ -90,3 +94,6 @@ object ChatsOverview
 
 @Serializable
 data class Chat(val name: String, val address: String)
+
+@Serializable
+data class Profile(val address: String)
