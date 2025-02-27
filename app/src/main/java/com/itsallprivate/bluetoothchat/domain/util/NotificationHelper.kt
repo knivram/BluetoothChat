@@ -48,7 +48,7 @@ object NotificationHelper {
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle("Message from: $deviceName")
+            .setContentTitle(deviceName)
             .setContentText(message)
             .setContentIntent(pendingIntent)
             .setCategory(NotificationCompat.CATEGORY_MESSAGE)
