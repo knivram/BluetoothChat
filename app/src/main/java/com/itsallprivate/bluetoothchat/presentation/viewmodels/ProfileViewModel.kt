@@ -22,7 +22,7 @@ class ProfileViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val chatRepository: ChatRepository,
 ) : ViewModel() {
-    private val _profile = MutableStateFlow(BluetoothDevice("", ""))
+    private val _profile = MutableStateFlow(BluetoothDevice("", "", ""))
     val profile = _profile.onStart {
         initProfile()
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), _profile.value)
@@ -34,7 +34,7 @@ class ProfileViewModel @Inject constructor(
             val address = savedStateHandle.toRoute<Profile>().address
             _profile.update {
                 chatRepository.getDevice(address).also {
-                    name.value = it.deviceName
+                    name.value = it.name
                 }
             }
         }
@@ -42,9 +42,10 @@ class ProfileViewModel @Inject constructor(
 
     fun save() {
         viewModelScope.launch {
-            chatRepository.updateDevice(
-                profile.value.copy(deviceName = name.value),
+            val newDevice = chatRepository.updateDevice(
+                profile.value.copy(name = name.value),
             )
+            _profile.update { newDevice }
         }
     }
 

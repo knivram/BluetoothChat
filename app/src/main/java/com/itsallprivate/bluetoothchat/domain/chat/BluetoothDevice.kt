@@ -8,4 +8,5 @@ typealias BluetoothDeviceDomain = BluetoothDevice
 data class BluetoothDevice(
     val deviceName: String,
     val address: String,
+    val name: String = deviceName,
 )

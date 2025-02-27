@@ -61,7 +61,7 @@ class ChatViewModel @Inject constructor(
     val device by lazy {
         try {
             savedStateHandle.toRoute<Chat>().let {
-                BluetoothDevice(deviceName = it.deviceName, address = it.address)
+                BluetoothDevice(deviceName = it.deviceName, address = it.address, name = it.name)
             }
         } catch (e: Exception) {
             BluetoothDevice("Not Found", "")

@@ -38,7 +38,7 @@ private fun getInitials(name: String): String {
     val parts = name.trim().split("\\s+".toRegex())
     return if (parts.size >= 2) {
         "${parts.first().first().uppercaseChar()}${parts.last().first().uppercaseChar()}"
-    } else if (parts.isNotEmpty()) {
+    } else if (parts.isNotEmpty() && parts.first().isNotBlank()) {
         parts.first().first().uppercaseChar().toString()
     } else {
         ""

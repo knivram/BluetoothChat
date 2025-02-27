@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.itsallprivate.bluetoothchat.domain.chat.BluetoothDevice
 import com.itsallprivate.bluetoothchat.domain.chat.BluetoothMessage
 import com.itsallprivate.bluetoothchat.domain.chat.ChatOverview
 import java.time.LocalDate
@@ -37,7 +38,7 @@ fun ChatOverviewItem(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         ProfilePicture(
-            name = chatOverview.name,
+            name = chatOverview.device.name,
             size = 56,
         )
         Spacer(modifier = Modifier.width(16.dp))
@@ -46,7 +47,7 @@ fun ChatOverviewItem(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = chatOverview.name,
+                    text = chatOverview.device.name,
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -92,8 +93,11 @@ fun ChatOverviewItemPreview() {
         dateTime = LocalDateTime.now().minusHours(1),
     )
     val sampleOverview = ChatOverview(
-        name = "James Alexander Carter",
-        address = "00:11:22:33:44:55",
+        BluetoothDevice(
+            name = "James Alexander Carter",
+            deviceName = "Pixel 4a",
+            address = "00:11:22:33:44:55",
+        ),
         latestMessage = sampleMessage,
     )
     ChatOverviewItem(chatOverview = sampleOverview, onClick = {}, modifier = Modifier.width(300.dp))

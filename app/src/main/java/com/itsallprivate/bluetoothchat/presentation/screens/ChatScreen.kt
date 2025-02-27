@@ -78,7 +78,7 @@ fun ChatScreen(
                     .padding(innerPadding),
             ) {
                 ChatTopBar(
-                    title = device.deviceName,
+                    title = device.name,
                     status = status,
                     onBackAction = {
                         viewModel.disconnectFromDevice()
