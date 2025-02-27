@@ -54,4 +54,10 @@ class ProfileViewModel @Inject constructor(
     fun reset() {
         name.value = profile.value.deviceName
     }
+
+    fun delete() {
+        viewModelScope.launch {
+            chatRepository.deleteDeviceAndAllMessages(profile.value.address)
+        }
+    }
 }

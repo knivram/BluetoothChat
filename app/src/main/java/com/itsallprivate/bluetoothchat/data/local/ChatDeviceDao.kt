@@ -18,4 +18,7 @@ interface ChatDeviceDao {
 
     @Query("SELECT * FROM chat_devices")
     suspend fun getAll(): List<ChatDeviceEntity>
+
+    @Query("DELETE FROM chat_devices WHERE address = :address")
+    suspend fun deleteByAddress(address: String)
 }

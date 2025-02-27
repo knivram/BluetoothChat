@@ -66,6 +66,13 @@ class ChatRepositoryImpl(
             device
         }
     }
+
+    override suspend fun deleteDeviceAndAllMessages(address: String) {
+        withContext(Dispatchers.IO) {
+            chatMessageDao.deleteByAddress(address)
+            chatDeviceDao.deleteByAddress(address)
+        }
+    }
 }
 
 private fun BluetoothMessage.toEntity(deviceAddress: String) = ChatMessageEntity(
