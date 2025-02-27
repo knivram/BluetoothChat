@@ -48,8 +48,14 @@ fun ChatTopBar(
                     contentDescription = "Back",
                 )
             }
-            Row {
-
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                ProfilePicture(
+                    name = title,
+                    size = 38,
+                )
                 Text(
                     text = title,
                     overflow = TextOverflow.Ellipsis,
