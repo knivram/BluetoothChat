@@ -71,16 +71,6 @@ class ChatViewModel @Inject constructor(
     private var deviceConnectionJob: Job? = null
 
     init {
-        bluetoothController.isConnected.onEach { isConnected ->
-            _status.update {
-                if (isConnected) {
-                    ConnectionStatus.CONNECTED
-                } else {
-                    ConnectionStatus.DISCONNECTED
-                }
-            }
-        }.launchIn(viewModelScope)
-
         viewModelScope.launch {
             chatRepository.getMessagesForDevice(device.address).let { loadedMessages ->
                 _messages.update { loadedMessages }
@@ -91,7 +81,7 @@ class ChatViewModel @Inject constructor(
     fun disconnectFromDevice() {
         bluetoothController.closeAllConnections()
         deviceConnectionJob?.cancel()
-        _status.update { ConnectionStatus.DISCONNECTED }
+        waitForIncomingConnections()
     }
 
     fun connectConnectToDevice() {
@@ -129,13 +119,13 @@ class ChatViewModel @Inject constructor(
                         showToast(WRONG_DEVICE)
                         bluetoothController.closeAllConnections()
                         deviceConnectionJob?.cancel()
-                        _status.update { ConnectionStatus.DISCONNECTED }
+                        waitForIncomingConnections()
                     }
                 }
 
                 is ConnectionResult.Error -> {
                     showToast(result.errorCode)
-                    _status.update { ConnectionStatus.DISCONNECTED }
+                    waitForIncomingConnections()
                 }
 
                 is ConnectionResult.MessageReceived -> {

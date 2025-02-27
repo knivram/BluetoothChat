@@ -136,7 +136,7 @@ fun ChatScreen(
 
                             ConnectionStatus.DISCONNECTED -> {
                                 Button(onClick = viewModel::waitForIncomingConnections) {
-                                    Text("Make Discoverable")
+                                    Text("Make discoverable")
                                 }
                             }
                         }
