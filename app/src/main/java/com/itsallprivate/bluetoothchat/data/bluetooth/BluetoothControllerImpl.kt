@@ -119,7 +119,7 @@ class BluetoothControllerImpl(
                             service.listenForIncomingMessages().map { message ->
                                 NotificationHelper.showNotification(
                                     context,
-                                    remoteDevice.name,
+                                    remoteDevice.deviceName,
                                     message.message,
                                 )
                                 ConnectionResult.MessageReceived(message)
@@ -162,7 +162,7 @@ class BluetoothControllerImpl(
                             service.listenForIncomingMessages().map { message ->
                                 NotificationHelper.showNotification(
                                     context,
-                                    remoteDevice.name,
+                                    remoteDevice.deviceName,
                                     message.message,
                                 )
                                 ConnectionResult.MessageReceived(message)

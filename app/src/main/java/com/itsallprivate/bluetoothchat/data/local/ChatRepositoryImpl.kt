@@ -17,7 +17,7 @@ class ChatRepositoryImpl(
             chatDeviceDao.insertIfNotExists(
                 ChatDeviceEntity(
                     address = device.address,
-                    name = device.name,
+                    deviceName = device.deviceName,
                 ),
             )
             chatMessageDao.insert(
@@ -47,7 +47,7 @@ class ChatRepositoryImpl(
         return withContext(Dispatchers.IO) {
             chatDeviceDao.getAll().map {
                 BluetoothDevice(
-                    name = it.name,
+                    deviceName = it.deviceName,
                     address = it.address,
                 )
             }
@@ -66,7 +66,7 @@ class ChatRepositoryImpl(
                     )
                 }
                 ChatOverview(
-                    name = deviceEntity.name,
+                    name = deviceEntity.deviceName,
                     address = deviceEntity.address,
                     latestMessage = latestMessage,
                 )
@@ -78,7 +78,7 @@ class ChatRepositoryImpl(
         return withContext(Dispatchers.IO) {
             chatDeviceDao.getDevice(address)?.let {
                 BluetoothDevice(
-                    name = it.name,
+                    deviceName = it.deviceName,
                     address = it.address,
                 )
             } ?: throw IllegalArgumentException("Device not found")
@@ -90,7 +90,7 @@ class ChatRepositoryImpl(
             chatDeviceDao.upsert(
                 ChatDeviceEntity(
                     address = device.address,
-                    name = device.name,
+                    deviceName = device.deviceName,
                 ),
             )
             device

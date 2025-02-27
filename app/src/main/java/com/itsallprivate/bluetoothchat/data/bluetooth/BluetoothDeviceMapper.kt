@@ -7,7 +7,7 @@ import com.itsallprivate.bluetoothchat.domain.chat.BluetoothDeviceDomain
 @SuppressLint("MissingPermission")
 fun BluetoothDevice.toBluetoothDeviceDomain(): BluetoothDeviceDomain {
     return BluetoothDeviceDomain(
-        name = name ?: "(Unknown)",
+        deviceName = name ?: "(Unknown)",
         address = address,
     )
 }

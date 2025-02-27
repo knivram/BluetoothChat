@@ -99,7 +99,7 @@ fun ChatsOverviewScreen(
                     DeviceList(
                         onClick = {
                             showingBottomSheet = false
-                            navController.navigate(Chat(it.name, it.address))
+                            navController.navigate(Chat(it.deviceName, it.address))
                         },
                     )
                 }

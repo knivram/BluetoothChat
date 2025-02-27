@@ -113,7 +113,7 @@ fun ProfileScreen(
                     horizontalArrangement = Arrangement.Center,
                 ) {
                     ProfilePicture(
-                        name = profile.name,
+                        name = profile.deviceName,
                         size = 186,
                     )
                 }
@@ -134,7 +134,7 @@ fun ProfileScreen(
                                 onValueChange = { name = it },
                             )
                         } else {
-                            Text(profile.name)
+                            Text(profile.deviceName)
                         }
                     }
 
@@ -142,7 +142,7 @@ fun ProfileScreen(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         Text("Device Name", style = MaterialTheme.typography.titleLarge)
-                        Text(profile.name)
+                        Text(profile.deviceName)
                     }
 
                     Column(
