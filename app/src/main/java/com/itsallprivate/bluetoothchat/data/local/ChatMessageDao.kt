@@ -9,7 +9,7 @@ interface ChatMessageDao {
     @Insert
     suspend fun insert(message: ChatMessageEntity)
 
-    @Query("SELECT * FROM chat_messages WHERE deviceAddress = :address ORDER BY dateTime ASC")
+    @Query("SELECT * FROM chat_messages WHERE deviceAddress = :address ORDER BY dateTime DESC")
     suspend fun getByAddress(address: String): List<ChatMessageEntity>
 
     @Query("SELECT * FROM chat_messages WHERE deviceAddress = :address ORDER BY dateTime DESC LIMIT 1")
