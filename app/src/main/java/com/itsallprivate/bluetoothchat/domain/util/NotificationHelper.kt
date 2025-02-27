@@ -22,6 +22,10 @@ object NotificationHelper {
             return
         }
 
+        if (AppLifecycleHelper.isAppInForeground()) {
+            return
+        }
+
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         val channel = NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH)
@@ -35,10 +39,11 @@ object NotificationHelper {
             context,
             0,
             intent,
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-            else
-                PendingIntent.FLAG_UPDATE_CURRENT,
+            } else {
+                PendingIntent.FLAG_UPDATE_CURRENT
+            },
         )
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
