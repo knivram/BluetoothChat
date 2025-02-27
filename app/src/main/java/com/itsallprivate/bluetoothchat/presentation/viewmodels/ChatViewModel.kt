@@ -2,6 +2,8 @@ package com.itsallprivate.bluetoothchat.presentation.viewmodels
 
 import android.content.Context
 import android.widget.Toast
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -58,21 +60,25 @@ class ChatViewModel @Inject constructor(
             disconnectFromDevice()
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(1000), _status.value)
 
-    val device by lazy {
-        try {
-            savedStateHandle.toRoute<Chat>().let {
-                BluetoothDevice(deviceName = it.deviceName, address = it.address, name = it.name)
+    private val _device = MutableStateFlow(
+        savedStateHandle.toRoute<Chat>().let {
+            BluetoothDevice(deviceName = it.deviceName, address = it.address)
+        },
+    )
+    val device = _device
+        .onStart {
+            viewModelScope.launch {
+                chatRepository.findDevice(_device.value.address)?.let { loadedDevice ->
+                    _device.update { loadedDevice }
+                }
             }
-        } catch (e: Exception) {
-            BluetoothDevice("Not Found", "")
-        }
-    }
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(1000), _device.value)
 
     private var deviceConnectionJob: Job? = null
 
     init {
         viewModelScope.launch {
-            chatRepository.getMessagesForDevice(device.address).let { loadedMessages ->
+            chatRepository.getMessagesForDevice(device.value.address).let { loadedMessages ->
                 _messages.update { loadedMessages }
             }
         }
@@ -87,7 +93,7 @@ class ChatViewModel @Inject constructor(
     fun connectConnectToDevice() {
         _status.update { ConnectionStatus.CONNECTING }
         deviceConnectionJob = bluetoothController
-            .connectToDevice(device)
+            .connectToDevice(device.value)
             .listen()
     }
 
@@ -104,7 +110,7 @@ class ChatViewModel @Inject constructor(
                 _messages.update {
                     listOf(bluetoothMessage) + it
                 }
-                chatRepository.addMessage(device, bluetoothMessage)
+                chatRepository.addMessage(device.value, bluetoothMessage)
             }
         }
     }
@@ -113,7 +119,7 @@ class ChatViewModel @Inject constructor(
         return onEach { result ->
             when (result) {
                 is ConnectionResult.ConnectionEstablished -> {
-                    if (result.device.address == device.address) {
+                    if (result.device.address == device.value.address) {
                         _status.update { ConnectionStatus.CONNECTED }
                     } else {
                         showToast(WRONG_DEVICE)
@@ -132,7 +138,7 @@ class ChatViewModel @Inject constructor(
                     _messages.update {
                         listOf(result.message) + it
                     }
-                    chatRepository.addMessage(device, result.message)
+                    chatRepository.addMessage(device.value, result.message)
                 }
             }
         }.catch { throwable ->

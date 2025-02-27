@@ -19,23 +19,25 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
+    savedStateHandle: SavedStateHandle,
     private val chatRepository: ChatRepository,
 ) : ViewModel() {
-    private val _profile = MutableStateFlow(BluetoothDevice("", "", ""))
+    private val _profile = MutableStateFlow(
+        savedStateHandle.toRoute<Profile>().let {
+            BluetoothDevice(deviceName = it.deviceName, address = it.address)
+        },
+    )
     val profile = _profile.onStart {
         initProfile()
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), _profile.value)
 
-    var name = mutableStateOf("")
+    var name = mutableStateOf(_profile.value.name)
 
     private fun initProfile() {
         viewModelScope.launch {
-            val address = savedStateHandle.toRoute<Profile>().address
-            _profile.update {
-                chatRepository.getDevice(address).also {
-                    name.value = it.name
-                }
+            chatRepository.findDevice(_profile.value.address)?.let { loadedDevice ->
+                _profile.update { loadedDevice }
+                name.value = loadedDevice.name
             }
         }
     }
