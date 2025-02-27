@@ -44,10 +44,6 @@ class BluetoothControllerImpl(
     }
     private var dataTransferService: BluetoothDataTransferService? = null
 
-    private val _isConnected = MutableStateFlow(false)
-    override val isConnected: StateFlow<Boolean>
-        get() = _isConnected.asStateFlow()
-
     private val _isDiscovering = MutableStateFlow(false)
     override val isDiscovering: StateFlow<Boolean>
         get() = _isDiscovering.asStateFlow()
@@ -78,26 +74,13 @@ class BluetoothControllerImpl(
     private var currentClientSocket: BluetoothSocket? = null
 
     init {
-        context.registerReceiver(
-            discoveryChangedReceiver,
-            IntentFilter()
-                .apply {
-                    addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED)
-                    addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
-                },
-        )
-        isDiscoveryChangedReceiverRegistered = true
-
-        context.registerReceiver(
-            foundDeviceReceiver,
-            IntentFilter(BluetoothDevice.ACTION_FOUND),
-        )
-        isFoundDeviceReceiverRegistered = true
+        registerReceivers()
 
         startDiscovery()
     }
 
     override fun startDiscovery() {
+        registerReceivers()
         if (!hasPermission(Manifest.permission.BLUETOOTH_SCAN)) {
             return
         }
@@ -226,6 +209,28 @@ class BluetoothControllerImpl(
             } else {
                 null
             }
+        }
+    }
+
+    private fun registerReceivers() {
+        if (!isFoundDeviceReceiverRegistered) {
+            context.registerReceiver(
+                foundDeviceReceiver,
+                IntentFilter(BluetoothDevice.ACTION_FOUND),
+            )
+            isFoundDeviceReceiverRegistered = true
+        }
+
+        if (!isDiscoveryChangedReceiverRegistered) {
+            context.registerReceiver(
+                discoveryChangedReceiver,
+                IntentFilter()
+                    .apply {
+                        addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED)
+                        addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
+                    },
+            )
+            isDiscoveryChangedReceiverRegistered = true
         }
     }
 
