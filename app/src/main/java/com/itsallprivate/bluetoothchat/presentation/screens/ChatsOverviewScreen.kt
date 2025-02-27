@@ -88,7 +88,6 @@ fun ChatsOverviewScreen(
                             onClick = {
                                 navController.navigate(
                                     Chat(
-                                        name = chat.device.name,
                                         address = chat.device.address,
                                         deviceName = chat.device.deviceName,
                                     ),
@@ -111,7 +110,6 @@ fun ChatsOverviewScreen(
                                 Chat(
                                     deviceName = it.deviceName,
                                     address = it.address,
-                                    name = it.name,
                                 ),
                             )
                         },

@@ -52,10 +52,9 @@ class ChatRepositoryImpl(
         }
     }
 
-    override suspend fun getDevice(address: String): BluetoothDevice {
+    override suspend fun findDevice(address: String): BluetoothDevice? {
         return withContext(Dispatchers.IO) {
             chatDeviceDao.getDevice(address)?.toDomain()
-                ?: throw IllegalArgumentException("Device not found")
         }
     }
 

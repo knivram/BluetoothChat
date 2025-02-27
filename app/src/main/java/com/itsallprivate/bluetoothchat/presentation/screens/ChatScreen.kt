@@ -47,7 +47,7 @@ fun ChatScreen(
     val viewModel = hiltViewModel<ChatViewModel>()
     val messages by viewModel.messages.collectAsState()
     val status by viewModel.status.collectAsState()
-    val device = viewModel.device
+    val device by viewModel.device.collectAsState()
 
     var message by rememberSaveable { mutableStateOf("") }
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -85,7 +85,7 @@ fun ChatScreen(
                         navController.popBackStack()
                     },
                     onProfile = {
-                        navController.navigate(Profile(device.address))
+                        navController.navigate(Profile(address = device.address, deviceName = device.deviceName))
                     },
                     onDisconnect = viewModel::disconnectFromDevice,
                     onConnect = viewModel::connectConnectToDevice,
