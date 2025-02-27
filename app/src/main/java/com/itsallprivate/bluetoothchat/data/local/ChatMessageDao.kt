@@ -14,4 +14,7 @@ interface ChatMessageDao {
 
     @Query("SELECT * FROM chat_messages WHERE deviceAddress = :address ORDER BY dateTime DESC LIMIT 1")
     suspend fun getLatestMessageForDevice(address: String): ChatMessageEntity?
+
+    @Query("DELETE FROM chat_messages WHERE deviceAddress = :address")
+    suspend fun deleteByAddress(address: String)
 }
