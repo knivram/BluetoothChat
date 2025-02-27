@@ -73,4 +73,27 @@ class ChatRepositoryImpl(
             }.sortedByDescending { it.latestMessage?.dateTime }
         }
     }
+
+    override suspend fun getDevice(address: String): BluetoothDevice {
+        return withContext(Dispatchers.IO) {
+            chatDeviceDao.getDevice(address)?.let {
+                BluetoothDevice(
+                    name = it.name,
+                    address = it.address,
+                )
+            } ?: throw IllegalArgumentException("Device not found")
+        }
+    }
+
+    override suspend fun updateDevice(device: BluetoothDevice): BluetoothDevice {
+        return withContext(Dispatchers.IO) {
+            chatDeviceDao.upsert(
+                ChatDeviceEntity(
+                    address = device.address,
+                    name = device.name,
+                ),
+            )
+            device
+        }
+    }
 }
