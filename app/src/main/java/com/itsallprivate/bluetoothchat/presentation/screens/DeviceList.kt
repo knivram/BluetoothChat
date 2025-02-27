@@ -86,7 +86,7 @@ fun DeviceList(
                     )
                 }
             } else {
-                items(state.scannedDevices.sortedByDescending { it.name }) { device ->
+                items(state.scannedDevices.sortedByDescending { it.deviceName }) { device ->
                     DeviceItem(
                         device = device,
                         onClick = { onClick(device) },
@@ -125,7 +125,7 @@ private fun DeviceItem(
             .padding(horizontal = 16.dp, vertical = 8.dp),
     ) {
         Text(
-            text = device.name,
+            text = device.deviceName,
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium,
         )

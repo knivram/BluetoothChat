@@ -34,7 +34,7 @@ class ProfileViewModel @Inject constructor(
             val address = savedStateHandle.toRoute<Profile>().address
             _profile.update {
                 chatRepository.getDevice(address).also {
-                    name.value = it.name
+                    name.value = it.deviceName
                 }
             }
         }
@@ -43,12 +43,12 @@ class ProfileViewModel @Inject constructor(
     fun save() {
         viewModelScope.launch {
             chatRepository.updateDevice(
-                profile.value.copy(name = name.value),
+                profile.value.copy(deviceName = name.value),
             )
         }
     }
 
     fun reset() {
-        name.value = profile.value.name
+        name.value = profile.value.deviceName
     }
 }

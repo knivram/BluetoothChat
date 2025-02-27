@@ -6,6 +6,6 @@ typealias BluetoothDeviceDomain = BluetoothDevice
 
 @Serializable
 data class BluetoothDevice(
-    val name: String,
+    val deviceName: String,
     val address: String,
 )

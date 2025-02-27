@@ -93,7 +93,7 @@ class MainActivity : ComponentActivity() {
 object ChatsOverview
 
 @Serializable
-data class Chat(val name: String, val address: String)
+data class Chat(val deviceName: String, val address: String)
 
 @Serializable
 data class Profile(val address: String)
