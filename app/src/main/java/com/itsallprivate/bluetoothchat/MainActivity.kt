@@ -26,7 +26,6 @@ class MainActivity : ComponentActivity() {
     private val bluetoothAdapter by lazy {
         bluetoothManager?.adapter
     }
-
     private val isBluetoothEnabled: Boolean
         get() = bluetoothAdapter?.isEnabled == true
 
@@ -47,14 +46,21 @@ class MainActivity : ComponentActivity() {
             }
 
             if (canEnableBluetooth && !isBluetoothEnabled) {
-                // ask user to turn on bluetooth
                 enableBluetoothLauncher.launch(
                     Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE),
                 )
             }
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            permissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.BLUETOOTH_SCAN,
+                    Manifest.permission.BLUETOOTH_CONNECT,
+                    Manifest.permission.POST_NOTIFICATIONS,
+                ),
+            )
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             permissionLauncher.launch(
                 arrayOf(
                     Manifest.permission.BLUETOOTH_SCAN,

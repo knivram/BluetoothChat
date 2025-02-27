@@ -16,6 +16,7 @@ import com.itsallprivate.bluetoothchat.domain.chat.BluetoothDeviceDomain
 import com.itsallprivate.bluetoothchat.domain.chat.BluetoothMessage
 import com.itsallprivate.bluetoothchat.domain.chat.ConnectionClosedException
 import com.itsallprivate.bluetoothchat.domain.chat.ConnectionResult
+import com.itsallprivate.bluetoothchat.domain.util.NotificationHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -66,7 +67,6 @@ class BluetoothControllerImpl(
         _isDiscovering.update { isDiscovering }
     }
 
-    // Flag to track receivers registration status
     private var isFoundDeviceReceiverRegistered = false
     private var isDiscoveryChangedReceiverRegistered = false
 
@@ -75,26 +75,18 @@ class BluetoothControllerImpl(
 
     init {
         registerReceivers()
-
         startDiscovery()
     }
 
     override fun startDiscovery() {
         registerReceivers()
-        if (!hasPermission(Manifest.permission.BLUETOOTH_SCAN)) {
-            return
-        }
-
+        if (!hasPermission(Manifest.permission.BLUETOOTH_SCAN)) return
         updatePairedDevices()
-
         bluetoothAdapter?.startDiscovery()
     }
 
     override fun stopDiscovery() {
-        if (!hasPermission(Manifest.permission.BLUETOOTH_SCAN)) {
-            return
-        }
-
+        if (!hasPermission(Manifest.permission.BLUETOOTH_SCAN)) return
         bluetoothAdapter?.cancelDiscovery()
     }
 
@@ -103,19 +95,16 @@ class BluetoothControllerImpl(
             if (!hasPermission(Manifest.permission.BLUETOOTH_CONNECT)) {
                 throw SecurityException("No BLUETOOTH_CONNECT permission")
             }
-
             stopDiscovery()
-
             currentServerSocket = bluetoothAdapter?.listenUsingRfcommWithServiceRecord(
                 "chat_service",
                 UUID.fromString(SERVICE_UUID),
             )
-
             var shouldLoop = true
             while (shouldLoop) {
                 try {
-                    currentClientSocket = currentServerSocket?.accept()?.also {
-                        emit(ConnectionResult.ConnectionEstablished(it.remoteDevice.toBluetoothDeviceDomain()))
+                    currentClientSocket = currentServerSocket?.accept()?.also { socket ->
+                        emit(ConnectionResult.ConnectionEstablished(socket.remoteDevice.toBluetoothDeviceDomain()))
                     }
                 } catch (e: IOException) {
                     shouldLoop = false
@@ -124,14 +113,17 @@ class BluetoothControllerImpl(
                     currentServerSocket?.close()
                     val service = BluetoothDataTransferService(clientSocket)
                     dataTransferService = service
-
+                    val remoteDevice = clientSocket.remoteDevice.toBluetoothDeviceDomain()
                     try {
                         emitAll(
-                            service
-                                .listenForIncomingMessages()
-                                .map {
-                                    ConnectionResult.MessageReceived(it)
-                                },
+                            service.listenForIncomingMessages().map { message ->
+                                NotificationHelper.showNotification(
+                                    context,
+                                    remoteDevice.name,
+                                    message.message,
+                                )
+                                ConnectionResult.MessageReceived(message)
+                            },
                         )
                     } catch (e: ConnectionClosedException) {
                         clientSocket.close()
@@ -154,15 +146,10 @@ class BluetoothControllerImpl(
             if (!hasPermission(Manifest.permission.BLUETOOTH_CONNECT)) {
                 throw SecurityException("No BLUETOOTH_CONNECT permission")
             }
-
             stopDiscovery()
-
             currentClientSocket = bluetoothAdapter
                 ?.getRemoteDevice(device.address)
-                ?.createRfcommSocketToServiceRecord(
-                    UUID.fromString(SERVICE_UUID),
-                )
-
+                ?.createRfcommSocketToServiceRecord(UUID.fromString(SERVICE_UUID))
             currentClientSocket?.let { socket ->
                 try {
                     currentServerSocket?.close()
@@ -170,11 +157,16 @@ class BluetoothControllerImpl(
                     emit(ConnectionResult.ConnectionEstablished(socket.remoteDevice.toBluetoothDeviceDomain()))
                     BluetoothDataTransferService(socket).also { service ->
                         dataTransferService = service
+                        val remoteDevice = socket.remoteDevice.toBluetoothDeviceDomain()
                         emitAll(
-                            service.listenForIncomingMessages()
-                                .map { message ->
-                                    ConnectionResult.MessageReceived(message)
-                                },
+                            service.listenForIncomingMessages().map { message ->
+                                NotificationHelper.showNotification(
+                                    context,
+                                    remoteDevice.name,
+                                    message.message,
+                                )
+                                ConnectionResult.MessageReceived(message)
+                            },
                         )
                     }
                 } catch (e: ConnectionClosedException) {
@@ -193,10 +185,7 @@ class BluetoothControllerImpl(
     }
 
     override suspend fun trySendMessage(message: String): BluetoothMessage? {
-        if (!hasPermission(Manifest.permission.BLUETOOTH_CONNECT)) {
-            return null
-        }
-
+        if (!hasPermission(Manifest.permission.BLUETOOTH_CONNECT)) return null
         return dataTransferService?.let { service ->
             val bluetoothMessage = BluetoothMessage(
                 message = message,
@@ -204,31 +193,22 @@ class BluetoothControllerImpl(
                 dateTime = LocalDateTime.now(),
             )
             val successful = service.sendMessage(bluetoothMessage.toByteArray())
-            if (successful) {
-                bluetoothMessage
-            } else {
-                null
-            }
+            if (successful) bluetoothMessage else null
         }
     }
 
     private fun registerReceivers() {
         if (!isFoundDeviceReceiverRegistered) {
-            context.registerReceiver(
-                foundDeviceReceiver,
-                IntentFilter(BluetoothDevice.ACTION_FOUND),
-            )
+            context.registerReceiver(foundDeviceReceiver, IntentFilter(BluetoothDevice.ACTION_FOUND))
             isFoundDeviceReceiverRegistered = true
         }
-
         if (!isDiscoveryChangedReceiverRegistered) {
             context.registerReceiver(
                 discoveryChangedReceiver,
-                IntentFilter()
-                    .apply {
-                        addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED)
-                        addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
-                    },
+                IntentFilter().apply {
+                    addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED)
+                    addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
+                },
             )
             isDiscoveryChangedReceiverRegistered = true
         }
@@ -262,20 +242,15 @@ class BluetoothControllerImpl(
     }
 
     private fun updatePairedDevices() {
-        if (!hasPermission(Manifest.permission.BLUETOOTH_CONNECT)) {
-            return
-        }
+        if (!hasPermission(Manifest.permission.BLUETOOTH_CONNECT)) return
         bluetoothAdapter
             ?.bondedDevices
             ?.mapTo(mutableSetOf()) { it.toBluetoothDeviceDomain() }
-            ?.let { devices ->
-                _pairedDevices.update { devices }
-            }
+            ?.let { devices -> _pairedDevices.update { devices } }
     }
 
-    private fun hasPermission(permission: String): Boolean {
-        return context.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
-    }
+    private fun hasPermission(permission: String): Boolean =
+        context.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
 
     companion object {
         const val SERVICE_UUID = "27b7d1da-08c7-4505-a6d1-2459987e5e2d"
