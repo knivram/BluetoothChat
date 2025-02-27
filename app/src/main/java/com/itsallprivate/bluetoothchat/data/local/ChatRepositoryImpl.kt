@@ -15,18 +15,10 @@ class ChatRepositoryImpl(
     override suspend fun addMessage(device: BluetoothDevice, message: BluetoothMessage) {
         withContext(Dispatchers.IO) {
             chatDeviceDao.insertIfNotExists(
-                ChatDeviceEntity(
-                    address = device.address,
-                    deviceName = device.deviceName,
-                ),
+                device.toEntity(),
             )
             chatMessageDao.insert(
-                ChatMessageEntity(
-                    deviceAddress = device.address,
-                    message = message.message,
-                    isFromLocalUser = message.isFromLocalUser,
-                    dateTime = message.dateTime,
-                ),
+                message.toEntity(device.address),
             )
         }
     }
@@ -34,11 +26,7 @@ class ChatRepositoryImpl(
     override suspend fun getMessagesForDevice(address: String): List<BluetoothMessage> {
         return withContext(Dispatchers.IO) {
             chatMessageDao.getByAddress(address).map {
-                BluetoothMessage(
-                    message = it.message,
-                    isFromLocalUser = it.isFromLocalUser,
-                    dateTime = it.dateTime,
-                )
+                it.toDomain()
             }
         }
     }
@@ -46,10 +34,7 @@ class ChatRepositoryImpl(
     override suspend fun getAllDevices(): List<BluetoothDevice> {
         return withContext(Dispatchers.IO) {
             chatDeviceDao.getAll().map {
-                BluetoothDevice(
-                    deviceName = it.deviceName,
-                    address = it.address,
-                )
+                it.toDomain()
             }
         }
     }
@@ -58,16 +43,9 @@ class ChatRepositoryImpl(
         return withContext(Dispatchers.IO) {
             chatDeviceDao.getAll().map { deviceEntity ->
                 val latestMessageEntity = chatMessageDao.getLatestMessageForDevice(deviceEntity.address)
-                val latestMessage = latestMessageEntity?.let { entity ->
-                    BluetoothMessage(
-                        message = entity.message,
-                        isFromLocalUser = entity.isFromLocalUser,
-                        dateTime = entity.dateTime,
-                    )
-                }
+                val latestMessage = latestMessageEntity?.toDomain()
                 ChatOverview(
-                    name = deviceEntity.deviceName,
-                    address = deviceEntity.address,
+                    device = deviceEntity.toDomain(),
                     latestMessage = latestMessage,
                 )
             }.sortedByDescending { it.latestMessage?.dateTime }
@@ -76,24 +54,42 @@ class ChatRepositoryImpl(
 
     override suspend fun getDevice(address: String): BluetoothDevice {
         return withContext(Dispatchers.IO) {
-            chatDeviceDao.getDevice(address)?.let {
-                BluetoothDevice(
-                    deviceName = it.deviceName,
-                    address = it.address,
-                )
-            } ?: throw IllegalArgumentException("Device not found")
+            chatDeviceDao.getDevice(address)?.toDomain()
+                ?: throw IllegalArgumentException("Device not found")
         }
     }
 
     override suspend fun updateDevice(device: BluetoothDevice): BluetoothDevice {
         return withContext(Dispatchers.IO) {
             chatDeviceDao.upsert(
-                ChatDeviceEntity(
-                    address = device.address,
-                    deviceName = device.deviceName,
-                ),
+                device.toEntity(),
             )
             device
         }
     }
 }
+
+private fun BluetoothMessage.toEntity(deviceAddress: String) = ChatMessageEntity(
+    message = message,
+    isFromLocalUser = isFromLocalUser,
+    dateTime = dateTime,
+    deviceAddress = deviceAddress,
+)
+
+private fun ChatMessageEntity.toDomain() = BluetoothMessage(
+    message = message,
+    isFromLocalUser = isFromLocalUser,
+    dateTime = dateTime,
+)
+
+private fun ChatDeviceEntity.toDomain() = BluetoothDevice(
+    deviceName = deviceName,
+    address = address,
+    name = name,
+)
+
+private fun BluetoothDevice.toEntity() = ChatDeviceEntity(
+    deviceName = deviceName,
+    address = address,
+    name = name,
+)

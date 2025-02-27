@@ -85,7 +85,15 @@ fun ChatsOverviewScreen(
                     items(chats) { chat ->
                         ChatOverviewItem(
                             chatOverview = chat,
-                            onClick = { navController.navigate(Chat(chat.name, chat.address)) },
+                            onClick = {
+                                navController.navigate(
+                                    Chat(
+                                        name = chat.device.name,
+                                        address = chat.device.address,
+                                        deviceName = chat.device.deviceName,
+                                    ),
+                                )
+                            },
                         )
                     }
                 }
@@ -99,7 +107,13 @@ fun ChatsOverviewScreen(
                     DeviceList(
                         onClick = {
                             showingBottomSheet = false
-                            navController.navigate(Chat(it.deviceName, it.address))
+                            navController.navigate(
+                                Chat(
+                                    deviceName = it.deviceName,
+                                    address = it.address,
+                                    name = it.name,
+                                ),
+                            )
                         },
                     )
                 }

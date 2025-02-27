@@ -7,4 +7,5 @@ import androidx.room.PrimaryKey
 data class ChatDeviceEntity(
     @PrimaryKey val address: String,
     val deviceName: String,
+    val name: String,
 )
