@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.itsallprivate.bluetoothchat.Chat
+import com.itsallprivate.bluetoothchat.Profile
 import com.itsallprivate.bluetoothchat.presentation.components.ChatOverviewItem
 import com.itsallprivate.bluetoothchat.presentation.viewmodels.ChatsOverviewViewModel
 
@@ -88,6 +89,14 @@ fun ChatsOverviewScreen(
                             onClick = {
                                 navController.navigate(
                                     Chat(
+                                        address = chat.device.address,
+                                        deviceName = chat.device.deviceName,
+                                    ),
+                                )
+                            },
+                            onProfileClick = {
+                                navController.navigate(
+                                    Profile(
                                         address = chat.device.address,
                                         deviceName = chat.device.deviceName,
                                     ),

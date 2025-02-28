@@ -53,7 +53,9 @@ fun ChatTopBar(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.clickable(onClick = onProfile),
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable(onClick = onProfile),
             ) {
                 ProfilePicture(
                     name = title,

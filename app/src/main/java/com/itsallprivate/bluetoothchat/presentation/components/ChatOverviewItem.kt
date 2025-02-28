@@ -1,6 +1,7 @@
 package com.itsallprivate.bluetoothchat.presentation.components
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -27,6 +28,7 @@ import java.time.format.DateTimeFormatter
 fun ChatOverviewItem(
     chatOverview: ChatOverview,
     onClick: () -> Unit,
+    onProfileClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -37,10 +39,12 @@ fun ChatOverviewItem(
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        ProfilePicture(
-            name = chatOverview.device.name,
-            size = 56,
-        )
+        Box(modifier = Modifier.clickable(onClick = onProfileClick)) {
+            ProfilePicture(
+                name = chatOverview.device.name,
+                size = 56,
+            )
+        }
         Spacer(modifier = Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {
             Row(
@@ -100,5 +104,5 @@ fun ChatOverviewItemPreview() {
         ),
         latestMessage = sampleMessage,
     )
-    ChatOverviewItem(chatOverview = sampleOverview, onClick = {}, modifier = Modifier.width(300.dp))
+    ChatOverviewItem(chatOverview = sampleOverview, onClick = {}, onProfileClick = {}, modifier = Modifier.width(300.dp))
 }
